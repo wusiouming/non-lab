@@ -3,9 +3,12 @@ let cam;
 
 let flowTime = 0;
 
-// 互動強度（累積參數）
+// 互動強度
 let interactionLevel = 0;
 let targetLevel = 0;
+
+// 衰減速度（回復速度）
+const RECOVER_SPEED = 0.001;
 
 let uiLayer;
 let startBtn;
@@ -36,7 +39,7 @@ precision mediump float;
 
 uniform sampler2D u_texture;
 uniform float u_time;
-uniform float u_power;   // ← 互動強度
+uniform float u_power;
 
 varying vec2 vTexCoord;
 
@@ -44,7 +47,6 @@ varying vec2 vTexCoord;
 float random(vec2 st) {
   return fract(sin(dot(st, vec2(12.9898,78.233))) * 43758.5453);
 }
-
 
 float noise(vec2 st) {
 
@@ -84,12 +86,27 @@ void main() {
 `;
 
 
+// ─── Remove Body Margin ─────────────────────
+
+function removeMargin() {
+  document.body.style.margin = '0';
+  document.body.style.padding = '0';
+  document.body.style.overflow = 'hidden';
+}
+
+
+// ─── Preload ───────────────────────────────
+
 function preload() {
   noiseShader = createShader(vert, frag);
 }
 
 
+// ─── Setup ────────────────────────────────
+
 function setup() {
+
+  removeMargin();
 
   pixelDensity(1);
 
@@ -111,6 +128,8 @@ function setup() {
 
 function createUI() {
 
+  const scale = min(windowWidth, windowHeight) / 400;
+
   uiLayer = createDiv('');
 
   uiLayer.position(0, 0);
@@ -126,8 +145,8 @@ function createUI() {
 
   startBtn = createButton('Enter');
 
-  startBtn.style('font-size', '18px');
-  startBtn.style('padding', '12px 28px');
+  startBtn.style('font-size', 22 * scale + 'px');
+  startBtn.style('padding', '14px 32px');
   startBtn.style('background', 'transparent');
   startBtn.style('color', '#fff');
   startBtn.style('border', '1px solid #fff');
@@ -137,15 +156,21 @@ function createUI() {
   startBtn.mousePressed(startExperience);
 
 
-  infoText = createP('Camera access is required. No data will be stored. Swipe finger to stir the flood.');
+  infoText = createP(`
+Camera access is required. No data will be stored.
+
+Swipe to stir the flood.
+Let the image slowly dissolve.
+  `);
 
   infoText.style('color', '#fff');
-  infoText.style('font-size', '13px');
+  infoText.style('font-size', 14 * scale + 'px');
   infoText.style('letter-spacing', '1px');
   infoText.style('opacity', '0.8');
-  infoText.style('margin-top', '20px');
+  infoText.style('margin-top', '24px');
   infoText.style('text-align', 'center');
-  infoText.style('max-width', '260px');
+  infoText.style('line-height', '1.6');
+  infoText.style('max-width', '300px');
 
 
   uiLayer.child(startBtn);
@@ -153,7 +178,7 @@ function createUI() {
 }
 
 
-// ─── Camera ──────────────────────────────────
+// ─── Camera ─────────────────────────────────
 
 function startExperience() {
 
@@ -161,22 +186,18 @@ function startExperience() {
 
   cameraStarted = true;
 
-
   cam = createCapture(
     {
       video: {
-        facingMode: { exact: "environment" } // ← 後鏡頭
+        facingMode: { exact: "environment" }
       },
       audio: false
     },
     () => {
-
       cam.hide();
       hideUI();
-
     }
   );
-
 }
 
 
@@ -195,22 +216,20 @@ function showUI() {
 
 // ─── Interaction ─────────────────────────────
 
-// 手指滑動累積能量
+// Touch
 function touchMoved() {
 
-  targetLevel += 0.015;
-
+  targetLevel += 0.01;
   targetLevel = constrain(targetLevel, 0, 1);
 
   return false;
 }
 
 
-// 滑鼠也支援（桌機）
+// Mouse
 function mouseDragged() {
 
   targetLevel += 0.01;
-
   targetLevel = constrain(targetLevel, 0, 1);
 
   return false;
@@ -229,7 +248,12 @@ function draw() {
   flowTime += deltaTime * 0.001;
 
 
-  // 平滑過渡（避免暴衝）
+  // 🌊 自動回復機制（重點）
+  targetLevel -= RECOVER_SPEED;
+  targetLevel = constrain(targetLevel, 0, 1);
+
+
+  // 平滑
   interactionLevel = lerp(interactionLevel, targetLevel, 0.05);
 
 
