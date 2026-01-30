@@ -157,7 +157,7 @@ function createUI() {
 
 
   infoText = createP(`
-Camera access is required. No data will be stored.
+Camera access is required. Run on mobile. No data will be stored.
 
 Swipe to stir the flood.
 Let the image slowly dissolve.
