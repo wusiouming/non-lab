@@ -193,9 +193,66 @@
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.05); opacity: 1; } }
+
+        /* --- 開場說明視窗 --- */
+        .intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            background-color: var(--deep-blue);
+            background-image: 
+                radial-gradient(circle at 50% 30%, #2a6f85 0%, transparent 60%),
+                linear-gradient(to bottom, #020b16 0%, #0b2c3e 100%);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+            opacity: 1; transition: opacity 0.8s ease;
+        }
+        .intro-overlay.hidden {
+            opacity: 0; pointer-events: none;
+        }
+        .intro-box {
+            background: transparent;
+            border: 1px solid rgba(207, 181, 104, 0.4);
+            border-radius: 20px;
+            padding: 35px 25px;
+            width: 85vw; max-width: 360px;
+            text-align: center;
+            box-shadow: inset 0 0 20px rgba(207, 181, 104, 0.05);
+        }
+        .intro-title {
+            color: var(--gold); font-size: 1.5rem; letter-spacing: 4px; margin-bottom: 25px; font-weight: normal;
+        }
+        .intro-content {
+            text-align: left; margin-bottom: 30px;
+        }
+        .intro-content p {
+            color: rgba(255,255,255,0.8); font-size: 0.85rem; line-height: 1.5; margin-bottom: 12px;
+        }
+        .intro-content p span {
+            color: var(--gold); font-weight: bold; display: block; margin-bottom: 2px; letter-spacing: 1px;
+        }
+        .intro-btn {
+            background: transparent; border: 1px solid var(--gold); color: var(--gold);
+            padding: 10px 35px; font-size: 0.95rem; letter-spacing: 2px; border-radius: 30px;
+            cursor: pointer; transition: all 0.3s ease; font-family: var(--font-main);
+        }
+        .intro-btn:hover, .intro-btn:active {
+            background: rgba(207, 181, 104, 0.15); box-shadow: 0 0 15px rgba(207, 181, 104, 0.3);
+        }
     </style>
 </head>
 <body>
+
+    <!-- 開場說明視窗 -->
+    <div class="intro-overlay" id="intro-modal">
+        <div class="intro-box">
+            <h1 class="intro-title">心裡的聲音</h1>
+            <div class="intro-content">
+                <p><span>1. 凝視與連結</span>請將臉部輕輕對準畫面中央的星盤。</p>
+                <p><span>2. 凝聚能量</span>指尖長按螢幕不放，感受星盤匯聚光芒與震動，直至能量充盈。</p>
+                <p><span>3. 釋放命運</span>隨心所欲地鬆開手指，讓星盤自由旋轉。</p>
+                <p><span>4. 領受啟示</span>若能量穩定，星盤將為你翻開命運之牌；若受到雜訊干擾，請閉上眼深呼吸，再次嘗試感應。</p>
+            </div>
+            <button class="intro-btn" id="start-btn">開啟感應</button>
+        </div>
+    </div>
 
     <div class="layer">
         <div class="abstract-shape shape-1"></div>
@@ -503,6 +560,15 @@
         }, {passive: false});
         
         window.addEventListener('touchend', releaseInteraction);
+
+        // 關閉開場說明視窗
+        document.getElementById('start-btn').addEventListener('click', () => {
+            const modal = document.getElementById('intro-modal');
+            modal.classList.add('hidden');
+            
+            // 點擊按鈕時順便初始化音效引擎（解決部分手機瀏覽器需互動才能發聲的限制）
+            SoundEngine.init();
+        });
     </script>
 </body>
 </html>
