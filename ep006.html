@@ -67,24 +67,58 @@
         /* 關鍵修正：翻轉只針對 portal-card，且不影響 JS 設定的縮放 */
         .flipped .portal-card { transform: rotateY(180deg); }
 
+        /* 雙重保證：在翻轉到背面時，隱藏正面元素，防止手機版相機畫面穿透 */
+        .flipped .card-front {
+            opacity: 0;
+            transition: opacity 0s 0.3s; /* 在翻轉動畫(1.2s)進行到四分之一時隱藏正面 */
+        }
+
         .card-face {
             position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; /* 針對 Safari 的修正 */
             backface-visibility: hidden;
             border-radius: 20px; overflow: hidden;
             border: 2px solid var(--gold);
         }
 
         /* --- 正面：相機與轉盤 --- */
-        .card-front { background: #000; display: flex; align-items: center; justify-content: center; }
+        .card-front { 
+            background: #000; display: flex; align-items: center; justify-content: center; 
+            transition: opacity 0s 0.3s; /* 翻回來時延遲顯示 */
+        }
         #camera-video {
             position: absolute; width: 100%; height: 100%;
             object-fit: cover; filter: grayscale(100%) brightness(0.4);
-            transform: scaleX(-1); z-index: 1;
+            /* 加入 translateZ(0) 強制硬體加速，防止 iOS 渲染錯誤 */
+            transform: scaleX(-1) translateZ(0); z-index: 1;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
         .vortex {
             width: 160%; height: 160%;
             background: conic-gradient(from 0deg, transparent 0%, #1a4a5a 20%, var(--gold) 50%, #1a4a5a 80%, transparent 100%);
             position: absolute; opacity: 0.4; filter: blur(4px); z-index: 2; mix-blend-mode: screen;
+        }
+
+        /* 新增：分析掃描光暈特效 */
+        .analysis-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 20px; height: 20px;
+            margin-top: -10px; margin-left: -10px;
+            border-radius: 50%;
+            box-shadow: 0 0 50px 20px rgba(207, 181, 104, 0.7), inset 0 0 30px rgba(255, 255, 255, 0.9);
+            background: rgba(207, 181, 104, 0.3);
+            z-index: 3; opacity: 0; pointer-events: none;
+        }
+        .analysis-ring.active {
+            animation: soulScan 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes soulScan {
+            0% { transform: scale(1); opacity: 0; }
+            20% { opacity: 1; }
+            80% { transform: scale(30); opacity: 0.8; }
+            100% { transform: scale(35); opacity: 0; }
         }
 
         .roulette-wrapper {
@@ -264,6 +298,8 @@
             <div class="card-face card-front">
                 <video id="camera-video" autoplay playsinline muted></video>
                 <div class="vortex" id="vortex-bg"></div>
+                <!-- 分析掃描光暈層 -->
+                <div class="analysis-ring" id="analysis-ring"></div>
                 <div class="roulette-wrapper">
                     <div class="pointer"></div>
                     <div class="roulette-ring" id="roulette-ring"></div>
@@ -343,6 +379,34 @@
                 if(riser) { try { riser.stop(); riser = null; } catch(e){} }
             };
 
+            // 新增：分析掃描音效，帶有頻率攀升與震動感
+            const playAnalysis = () => {
+                if (!ctx) return;
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 1.2);
+                
+                g.gain.setValueAtTime(0, now);
+                g.gain.linearRampToValueAtTime(0.08, now + 0.3);
+                g.gain.linearRampToValueAtTime(0, now + 1.5);
+                
+                // 加入顫音效果 (LFO)
+                const lfo = ctx.createOscillator();
+                lfo.frequency.value = 15;
+                const lfoGain = ctx.createGain();
+                lfoGain.gain.value = 30;
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.frequency);
+                lfo.start(now); lfo.stop(now + 1.5);
+                
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start(now); osc.stop(now + 1.5);
+            };
+
             const playReveal = () => {
                 const now = ctx.currentTime;
                 [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
@@ -370,7 +434,7 @@
                 osc.start(now); osc.stop(now + 0.5);
             };
 
-            return { init, startInteractionSounds, updateChargePitch, releaseSpin, stopInteractionSounds, playReveal, playError };
+            return { init, startInteractionSounds, updateChargePitch, releaseSpin, stopInteractionSounds, playAnalysis, playReveal, playError };
         })();
 
         const messages = [
@@ -390,7 +454,7 @@
             "你的直覺從未出錯，只是你偶爾忘記了聽從。", "去創造、去玩耍，宇宙愛死你快樂的樣子了。", "當你停止尋找，你想要的東西就會出現。",
             "宇宙的門扉始終開啟，只要你相信自己值得。", "沉默有時是最高級的回答，請享受這份靜謐。", "你是光的一部分，黑暗永遠無法將你吞噬。",
             "當前的困難只是幻象，你的本質是永恆的自由。", "每一次的選擇，都在編織你獨一無二的現實。", "信任那些無法解釋的驚喜，那是宇宙在對你眨眼。",
-            "回歸簡約，你會在空白處發現最豐富的靈感。", "你的存在本身，就是對這個世界最大的貢獻。", "在孤獨中盛開，在人群中保持清醒。",
+            "回歸簡約，你會讓空白處發現最豐富的靈感。", "你的存在本身，就是對這個世界最大的貢獻。", "在孤獨中盛開，在人群中保持清醒。",
             "現在的每一刻，都是重啟人生的最佳起點。", "讓勇氣成為你的羽翼，帶你飛越恐懼的峽谷。", "宇宙與你同在，你從來都不是孤身一人。",
             "細心觀察，生活到處都藏著神聖的暗號。", "你是無限可能性的海洋，而非狹窄的溪流。", "感謝當下的所有，感謝正在演化的自己。",
             "在呼吸中連結大地，在靜心中連結星辰。", "你不需要向誰證明，你只需向自己綻放。"
@@ -430,7 +494,7 @@
                 velocity *= FRICTION; 
                 if (velocity < 0.1) {
                     velocity = 0;
-                    triggerReveal(angle); 
+                    triggerAnalysis(angle); // 改變：不直接翻牌，先進入分析階段
                     return; 
                 }
             }
@@ -445,7 +509,7 @@
 
         function startInteraction(e) {
             if (state === 'FLIPPED') { resetSystem(); return; }
-            if (state === 'SPINNING') return;
+            if (state === 'SPINNING' || state === 'ANALYZING') return; // 分析期間禁止干擾
 
             SoundEngine.init();
             SoundEngine.startInteractionSounds();
@@ -453,7 +517,6 @@
             state = 'CHARGING';
             velocity = 0; 
             
-            // 修正點：縮放效果套用在 Container 上，不影響 Card 的 transform
             portalContainer.style.transform = "scale(0.96)";
             
             hint.innerText = "能量匯聚中... 鬆開手指擲出";
@@ -486,43 +549,68 @@
             hint.className = "instruction-bar spinning";
         }
 
-        function triggerReveal(finalAngle) {
+        // 階段 1：停格分析特效
+        function triggerAnalysis(finalAngle) {
+            state = 'ANALYZING'; // 設定為分析狀態
+            
+            let videoEl = document.getElementById('camera-video');
+            if (videoEl && videoEl.srcObject) {
+                videoEl.pause(); // 停格相機畫面
+            }
+
+            SoundEngine.playAnalysis(); // 播放分析掃描音效
+            
+            hint.innerText = "讀取靈魂頻率中...";
+            hint.className = "instruction-bar spinning";
+            
+            // 觸發光暈掃描動畫
+            const scanRing = document.getElementById('analysis-ring');
+            scanRing.classList.add('active');
+
+            // 等待 1.5 秒的儀式感後，執行翻牌判斷
+            setTimeout(() => {
+                scanRing.classList.remove('active');
+                executeReveal(finalAngle);
+            }, 1500);
+        }
+
+        // 階段 2：執行結果判斷與翻牌
+        function executeReveal(finalAngle) {
             let normalizedAngle = Math.abs(finalAngle % 360);
+            let videoEl = document.getElementById('camera-video');
             
             // 將失敗機率調整為約 30%
-            // 轉盤視覺每 45 度為一個循環，我們將每個循環中的前 13.5 度 (30%) 設為雜訊區塊
             let currentSectorAngle = normalizedAngle % 45;
             let isSuccess = currentSectorAngle >= 13.5;
 
             if (!isSuccess) {
                 state = 'IDLE';
                 SoundEngine.stopInteractionSounds();
-                SoundEngine.playError(); // 播放失敗音效
+                SoundEngine.playError(); 
 
-                // 失敗的視覺回饋
-                guideText.innerText = "內在探測失敗：雜訊過多";
-                guideText.style.color = "#ff4a4a"; // 變更為紅色警告
+                guideText.innerText = "探測失敗：雜訊過多";
+                guideText.style.color = "#ff4a4a"; 
                 guideText.style.opacity = '1';
                 
                 portalContainer.classList.add('error-shake');
                 setTimeout(() => portalContainer.classList.remove('error-shake'), 500);
 
-                hint.innerText = "探測失敗，請重新蓄能";
+                hint.innerText = "頻率干擾，請重新蓄能";
                 hint.className = "instruction-bar";
 
-                // 2秒後恢復預設提示
                 setTimeout(() => {
                     if (state === 'IDLE') {
                         guideText.innerText = "請將臉部對準中央";
                         guideText.style.color = "var(--light-gold)";
                         hint.innerText = "按住螢幕為星盤蓄能，鬆開擲出";
+                        if (videoEl && videoEl.srcObject) videoEl.play(); // 恢復相機
                     }
                 }, 2000);
                 
-                return; // 終止翻牌
+                return; 
             }
 
-            // 成功探測的邏輯
+            // 成功探測
             state = 'FLIPPED';
             SoundEngine.stopInteractionSounds();
             SoundEngine.playReveal();
@@ -533,14 +621,13 @@
 
             msgEl.innerText = messages[selectedIndex];
             
-            // 修正點：我們只在 portal-container 加上 flipped class
-            // 樣式表中的 .flipped .portal-card 會接手 rotateY(180deg)
             portalContainer.classList.add('flipped');
             hint.innerText = "點擊卡牌重新感應";
             hint.className = "instruction-bar";
         }
 
         function resetSystem() {
+            if (state === 'ANALYZING') return; // 分析期間不允許重置
             state = 'IDLE';
             portalContainer.classList.remove('flipped');
             angle = 0; velocity = 0;
@@ -548,6 +635,11 @@
             vortex.style.transform = `rotate(0deg)`;
             guideText.style.opacity = '1';
             hint.innerText = "按住螢幕為星盤蓄能，鬆開擲出";
+            
+            let videoEl = document.getElementById('camera-video');
+            if (videoEl && videoEl.srcObject) {
+                videoEl.play();
+            }
         }
 
         // 事件監聽
@@ -565,8 +657,6 @@
         document.getElementById('start-btn').addEventListener('click', () => {
             const modal = document.getElementById('intro-modal');
             modal.classList.add('hidden');
-            
-            // 點擊按鈕時順便初始化音效引擎（解決部分手機瀏覽器需互動才能發聲的限制）
             SoundEngine.init();
         });
     </script>
