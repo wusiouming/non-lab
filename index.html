@@ -3,163 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Timed Games EP007</title>
-
-<style>
-
-/* ===== Base ===== */
-
-body {
-    margin: 0;
-    font-family: Helvetica, Arial, sans-serif;
-    background: #000;
-    color: #fff;
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-}
-
-.container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    padding: 60px;
-    box-sizing: border-box;
-}
-
-/* ===== Layout ===== */
-
-.top-section {
-    display: flex;
-    flex: 1;
-    gap: 80px;
-}
-
-.poster {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.poster img {
-     width: 100%;
-    max-width: 480px;
-    height: auto;
-}
-
-.description {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    max-width: 520px;
-}
-
-/* ===== Typography ===== */
-
-.description h1 {
-    font-size: 2rem;
-    margin-bottom: 1.2rem;
-    letter-spacing: 1px;
-    font-weight: 500;
-}
-
-.description p {
-    line-height: 1.9;
-    opacity: 0.75;
-    font-size: 1rem;
-}
-
-/* ===== Bottom ===== */
-
-.bottom-section {
-    margin-top: 80px;
-    text-align: center;
-}
-
-/* ===== Button ===== */
-
-button {
-    padding: 20px 70px;
-    font-size: 1rem;
-    letter-spacing: 2px;
-    background: #fff;
-    color: #000;
-    border: none;
-    cursor: pointer;
-    transition: all 0.4s ease;
-    min-width: 260px;
-}
-
-button:disabled {
-    background: #111;
-    color: #666;
-    border: 1px solid #333;
-    cursor: not-allowed;
-}
-
-button.live-transition {
-    background: #fff;
-    color: #000;
-}
-
-/* ===== Mobile Only: 放大文字，不動版型 ===== */
-
-@media (max-width: 768px) {
-   .top-section {
-        flex-direction: column;
-        gap: 40px;
-    }
-    .poster img {
-        max-width: 100%;
-    }
-    body {
-        font-size: 16px;
-    }
-
-    .description h1 {
-        font-size: 1.2rem;
-    }
-
-    .description p {
-        font-size: 1.0rem;
-    }
-
-    button {
-        font-size: 1.1rem;
-        padding: 22px 40px;
-    }
-
-}
-
-</style>
+<title>耳朵學院 EP007</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Sora:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
-<div class="container">
-
-    <div class="top-section">
-        
-        <div class="poster">
-            <img src="poster.jpg" alt="Universal Insight Poster">
-        </div>
-
-        <div class="description">
-            <h1>限時遊戲 EP007</h1>
-            <p>
-                《許願池》是一場關於「丟棄」的儀式。 投入一段你想要捨棄的厭倦／欲望／聲音，系統會即時提取其中的頻譜特徵並將它崩解，轉化為一段混濁的震盪過程，最終消散在深淵之中。當聲音被系統代謝消彌為遙遠的聲響，你與你背負的緊繃連結也隨之分離。接著再轉身離開。
-                <br><br>
-               《限時遊戲》透過身體參與和環境感知機制，將個體的生命經驗轉化為可感知藝術場域。            </p>
-        </div>
-
-    </div>
-
-    <div class="bottom-section">
-        <button id="enterBtn" disabled>INITIALIZING...</button>
-    </div>
-
+<div id="background">
+    <div class="grain"></div>
+    <div class="vignette"></div>
 </div>
+
+<main id="experience">
+    <section class="layer is-active" data-layer="cover">
+        <div class="content">
+            <p class="label">ep007</p>
+            <h1>耳朵學院</h1>
+            <div class="copy">
+                <p class="lead">《耳朵學院》是一所限時開放的感知場所，引導參與者重新學習如何用耳朵感知世界。在資訊過載的時代，人們對周遭一切變得麻木。耳朵學院「限時開課」的機制，將聽覺轉化為一套可被設計與訓練的感知系統。</p>
+                <p class="lead">觀眾以「學員」身份進入課程完成一系列聽覺任務，重新校準人與環境之間的感知關係。<span class="hint-inline">這不是一件靜態的作品，而是一段不可重複的感知經驗。</span></p>
+            </div>
+            <button class="primary" id="enterBtn" disabled>初始化中...</button>
+        </div>
+    </section>
+</main>
 
 <script>
 
@@ -174,11 +43,11 @@ function updateCountdown() {
     if (distance <= 0 && !hasActivated) {
         hasActivated = true;
 
-        button.innerHTML = "NOW LIVE";
+        button.innerHTML = "課程開放";
         button.classList.add("live-transition");
 
         setTimeout(() => {
-            button.innerHTML = "ENTER";
+            button.innerHTML = "進入";
             button.disabled = false;
         }, 1000);
 
@@ -191,7 +60,7 @@ function updateCountdown() {
         const minutes = Math.floor((distance / (1000 * 60)) % 60);
         const seconds = Math.floor((distance / 1000) % 60);
 
-        button.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        button.innerHTML = `${days}天 ${hours}時 ${minutes}分 ${seconds}秒`;
     }
 }
 
