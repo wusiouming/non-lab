@@ -3,26 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNDERCURRENT | INNER DIVING</title>
+    <title>Sound Metabolism Practice</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Sora:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <button id="upload-button">Upload Signal</button>
-    <input type="file" id="file-upload" accept="audio/*" multiple style="display:none">
+    <div id="background">
+        <div class="grain"></div>
+        <div class="vignette"></div>
+        <canvas id="particle-canvas" aria-hidden="true"></canvas>
+    </div>
+
+    <main id="experience" aria-live="polite">
+        <section class="layer is-active" data-layer="0">
+            <div class="content">
+                <p class="label">Lesson 07</p>
+                <h1>聲音代謝練習</h1>
+                <p class="lead">有些事情要練習放手。</p>
+                <p class="lead">這次練習將引導你完成一次聽覺的釋放。</p>
+                <p class="lead">投入一段你想捨棄的聲音，讓它被揉碎。</p>
+                <p class="hint">進行一場感知的代謝。</p>
+                <button class="primary" id="start-btn">開始課程</button>
+            </div>
+        </section>
+
+        <section class="layer" data-layer="1">
+            <div class="content">
+                <p class="lead">在開始之前，</p>
+                <p class="lead">請先離開螢幕。</p>
+                <p class="lead">拿出一張紙。</p>
+                <p class="lead">寫下三件讓你覺得「太多」的事。</p>
+                <p class="hint">例如：沒完沒了的通知、沈重的關係、過剩的焦慮。</p>
+                <button class="primary" id="ready-btn">我準備好了</button>
+            </div>
+        </section>
+
+        <section class="layer" data-layer="2">
+            <div class="content">
+                <p class="lead">把它變成聲音。</p>
+                <p class="lead">你可以口述、呢喃、嘆息，</p>
+                <p class="lead">或錄下生活周邊的聲音。</p>
+                <div class="record-wrap">
+                    <button class="record" id="record-btn">開始錄音</button>
+                    <p class="status" id="record-status">只能錄一次。約 10-20 秒。</p>
+                </div>
+                <div class="waveform-frame">
+                    <canvas id="waveform-canvas"></canvas>
+                </div>
+                <button class="primary" id="to-metabolism-btn" disabled>繼續</button>
+            </div>
+        </section>
+
+        <section class="layer" data-layer="3">
+            <div class="content">
+                <p class="lead">把它丟入系統。</p>
+                <button class="primary" id="drop-btn">投下</button>
+                <p class="status" id="metabolism-status">請留在這段聲音裡。</p>
+                <p class="hint">聆聽它被揉碎、拉伸、變遠。</p>
+                <button class="primary" id="to-naming-btn" disabled>繼續</button>
+            </div>
+        </section>
+
+        <section class="layer" data-layer="4">
+            <div class="content">
+                <p class="lead">再次拿起你的紙。</p>
+                <p class="lead">那個聲音變成了什麼？</p>
+                <p class="lead">用一個形容詞為它命名。</p>
+                <p class="hint">例如：「焦慮的藍色」、「低沈的海浪」。</p>
+                <button class="primary" id="done-btn">寫好了</button>
+            </div>
+        </section>
+
+        <section class="layer" data-layer="5">
+            <div class="content">
+                <p class="lead">現在，那些聲音已經逐漸離你遠去，</p>
+                <p class="lead">從此，不會在你的身邊。</p>
+                <button class="primary" id="exit-btn">離開</button>
+            </div>
+        </section>
+    </main>
 
     <script type="importmap">
     {
       "imports": {
         "app/audio": "./js/audio.js",
-        "app/ui": "./js/ui.js",
         "app/effects": "./js/effects.js",
         "app/waveform": "./js/waveform.js",
-        "app/constants": "./js/constants.js",
-        "app/background": "./js/background.js",
-        "p5": "https://esm.sh/p5@1.9.0?bundle"
+        "app/constants": "./js/constants.js"
       }
     }
     </script>
