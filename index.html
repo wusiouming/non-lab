@@ -1,25 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>耳朵學院 EP007</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Sora:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<title>耳朵學院 EP008</title>
+<style>
+    :root {
+        --ink: #112238;
+        --mid: #3b5f7e;
+        --cream: #f1ebd7;
+        --shadow: rgba(17, 34, 56, 0.45);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0d1c2e;
+        font-family: "Arial Black", Impact, sans-serif;
+    }
+
+    .poster-frame {
+        width: min(92vw, 960px);
+        aspect-ratio: 2 / 3;
+        background: var(--cream);
+        border: 10px solid var(--ink);
+        box-shadow: 18px 18px 0 var(--shadow);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .poster-frame img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .overlay {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        padding: 26px 26px 30px;
+        background: linear-gradient(180deg, rgba(17, 34, 56, 0) 0%, rgba(17, 34, 56, 0.92) 100%);
+        color: var(--cream);
+        text-align: left;
+    }
+
+    .label {
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        opacity: 0.85;
+        margin-bottom: 8px;
+        font-family: sans-serif;
+        font-weight: bold;
+    }
+
+    h1 {
+        margin: 0 0 14px;
+        font-size: 2.1rem;
+        letter-spacing: 1px;
+    }
+
+    .copy {
+        font-family: sans-serif;
+        font-weight: bold;
+        color: var(--cream);
+        line-height: 1.6;
+        font-size: 0.95rem;
+        margin-bottom: 18px;
+    }
+
+    .copy .lead {
+        margin: 0 0 10px;
+    }
+
+    .hint-inline {
+        color: #d4d9dd;
+    }
+
+    #enterBtn {
+        display: inline-block;
+        padding: 10px 22px;
+        background: var(--cream);
+        color: var(--ink);
+        border: 3px solid var(--ink);
+        box-shadow: 4px 4px 0 var(--shadow);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    #enterBtn:disabled {
+        opacity: 0.7;
+        cursor: default;
+    }
+
+    #enterBtn:active {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 var(--shadow);
+    }
+
+    @media (max-width: 720px) {
+        .poster-frame {
+            width: 92vw;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+        }
+
+        .copy {
+            font-size: 0.9rem;
+        }
+    }
+</style>
 </head>
-
 <body>
-<div id="background">
-    <div class="grain"></div>
-    <div class="vignette"></div>
-</div>
-
-<main id="experience">
-    <section class="layer is-active" data-layer="cover">
-        <div class="content">
-            <p class="label">ep007</p>
+    <div class="poster-frame">
+        <img src="poster.jpg" alt="耳朵學院 EP008 海報">
+        <div class="overlay">
+            <div class="label">ep008</div>
             <h1>耳朵學院</h1>
             <div class="copy">
                 <p class="lead">《耳朵學院》是一所限時開放的感知場所，引導參與者重新學習如何用耳朵感知世界。在資訊過載的時代，人們對周遭一切變得麻木。耳朵學院「限時開課」的機制，將聽覺轉化為一套可被設計與訓練的感知系統。</p>
@@ -27,11 +140,9 @@
             </div>
             <button class="primary" id="enterBtn" disabled>初始化中...</button>
         </div>
-    </section>
-</main>
+    </div>
 
 <script>
-
 const launchDate = new Date("2026-03-22T20:00:00").getTime();
 const button = document.getElementById("enterBtn");
 let hasActivated = false;
@@ -69,11 +180,9 @@ updateCountdown();
 
 button.addEventListener("click", function() {
     if (!button.disabled) {
-        window.location.href = "ep007.html";
+        window.location.href = "ep008.html";
     }
 });
-
 </script>
-
 </body>
 </html>
