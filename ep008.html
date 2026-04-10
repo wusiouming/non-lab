@@ -456,7 +456,7 @@
     <div id="app-container">
         <header>
             <h1>Echo Reflex</h1>
-            <p>聲音校準流程</p>
+            <p>聲音校準流程 · 建議攜帶耳機測試</p>
         </header>
 
         <div id="game-board" class="idle">
@@ -1026,6 +1026,7 @@
         gameBoard.addEventListener('touchstart', (e) => {
             if (e.target.closest('input, button')) return;
             e.preventDefault();
+            initAudio();
             const touchEvent = new MouseEvent('mousedown');
             gameBoard.dispatchEvent(touchEvent);
         }, { passive: false });
