@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SOUND BRICKS - city asmr</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Spectral:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <style>
+    :root {
+      --bg-dark: #1a2330;      /* 深海軍藍 */
+      --paper-cream: #f4eddc;  /* 紙感米白 */
+      --slate-blue: #324354;   /* 石墨藍 */
+      --active-blue: #516477;  /* 亮灰藍 */
+      --accent: #9aa7b3;
+      --cat-atmo: #2d3b4e;     /* 深藍 */
+      --cat-activity: #3a4352; /* 深灰藍 */
+      --cat-infra: #3a3152;    /* 深紫 */
+      --ink: #10161f;
+      --bg-shift: 0;
+      --atmo-line: rgba(240,230,210,0.8);
+      --act-line: rgba(217,92,20,0.7);
+      --infra-line: rgba(42,92,90,0.75);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Spectral', Georgia, serif;
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(rgba(244,237,220,0.06) 1px, transparent 1px),
+        linear-gradient(180deg,
+          rgba(46,60,78,0.95) 0%,
+          rgba(26,35,48,0.9) calc(60% - var(--bg-shift)),
+          rgba(18,26,36,1) 100%
+        );
+      background-size: 22px 22px, 100% 100%;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      touch-action: none;
+    }
+    .sound-waves {
+      position: absolute;
+      left: 50%;
+      top: 16%;
+      transform: translateX(-50%);
+      width: min(760px, 92vw);
+      height: 120px;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.65;
+      mix-blend-mode: soft-light;
+    }
+    .bottom-hint {
+      position: absolute;
+      bottom: 8vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--paper-cream);
+      opacity: 0.65;
+      pointer-events: none;
+      z-index: 6;
+      background: rgba(17,24,32,0.55);
+      border: 1px solid rgba(241,235,217,0.2);
+      padding: 4px 8px;
+      border-radius: 10px;
+    }
+    .wave-line {
+      fill: none;
+      stroke: rgba(244,237,220,0.55);
+      stroke-width: 1.8;
+    }
+    body::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10,15,20,0.45), rgba(10,15,20,0.25) 45%, rgba(10,15,20,0.55));
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 頂部標題 */
+    .title {
+      position: absolute;
+      top: 30px;
+      width: 100%;
+      text-align: center;
+      color: var(--paper-cream);
+      font-size: 2.2rem;
+      letter-spacing: 4px;
+      font-weight: 300;
+      z-index: 20;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1.1;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+    }
+    .title-main {
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      font-family: 'Bebas Neue', sans-serif;
+    }
+    .title-sub {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.72rem;
+      letter-spacing: 5px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .title:hover {
+      opacity: 0.7;
+      transform: scale(1.02);
+    }
+
+    /* 狀態提示字 */
+    .status {
+      position: absolute;
+      top: 102px;
+      width: 100%;
+      text-align: center;
+      color: var(--accent);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      z-index: 10;
+      pointer-events: none;
+      transition: color 0.3s;
+    }
+
+    /* 中心耳朵 */
+    .ear-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+      margin-bottom: 26vh;
+    }
+
+    .ear-btn {
+      width: 160px;
+      height: 160px;
+      cursor: pointer;
+      color: var(--paper-cream);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ear-btn:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 15px rgba(241, 235, 217, 0.3));
+    }
+    .ear-container.longpress-hint::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      border: 1px solid rgba(241,235,217,0.18);
+      box-shadow: 0 0 18px rgba(241,235,217,0.08);
+      animation: hint-breathe 2.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes hint-breathe {
+      0% { transform: scale(0.92); opacity: 0.0; }
+      40% { transform: scale(1.0); opacity: 0.35; }
+      100% { transform: scale(1.08); opacity: 0.0; }
+    }
+
+    .radial-menu {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 260px;
+      height: 260px;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 15;
+    }
+    .radial-menu.show { opacity: 1; pointer-events: auto; }
+    .radial-item {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--paper-cream);
+      border: 1px solid rgba(241,235,217,0.2);
+      background: rgba(17,24,32,0.7);
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      user-select: none;
+    }
+    .radial-item.active {
+      transform: scale(1.08);
+      background: rgba(241,235,217,0.12);
+      border-color: rgba(241,235,217,0.45);
+    }
+    .radial-item[data-category="atmosphere"] { top: -18px; left: 50%; transform: translateX(-50%); }
+    .radial-item[data-category="activity"] { top: 50%; right: -18px; transform: translateY(-50%); }
+    .radial-item[data-category="infrastructure"] { bottom: -18px; left: 50%; transform: translateX(-50%); }
+    .radial-item[data-category="random"] { top: 50%; left: -18px; transform: translateY(-50%); }
+
+    @keyframes pulse-glow {
+      0% { filter: drop-shadow(0 0 5px rgba(241,235,217,0.2)); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 25px rgba(241,235,217,0.6)); transform: scale(1.02); }
+      100% { filter: drop-shadow(0 0 5px rgba(241,235,217,0.2)); transform: scale(1); }
+    }
+    .is-playing .ear-btn {
+      animation: pulse-glow 3s infinite ease-in-out;
+    }
+
+    /* 背景星星 */
+    .stars-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 60vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    .star {
+      position: absolute;
+      background-color: var(--paper-cream);
+      border-radius: 50%;
+      opacity: 0;
+      animation: twinkle linear infinite;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0; transform: scale(0.3); }
+      50% { opacity: 0.5; transform: scale(1); box-shadow: 0 0 3px var(--paper-cream); }
+      100% { opacity: 0; transform: scale(0.3); }
+    }
+
+    /* 小貓咪 */
+    #rooftop-cat {
+      position: absolute;
+      font-size: 22px;
+      z-index: 60;
+      pointer-events: auto;
+      opacity: 0;
+      transition: opacity 0.5s;
+      transform-origin: bottom center;
+      filter: drop-shadow(0 0 5px rgba(241, 235, 217, 0.3));
+      cursor: pointer;
+    }
+
+    /* 城市天際線 */
+    .cityscape {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 48vh;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 10px;
+      z-index: 5;
+    }
+
+    .building {
+      max-width: 110px;
+      min-width: 35px;
+      background: transparent;
+      border-top-left-radius: 2px;
+      border-top-right-radius: 2px;
+      cursor: ns-resize;
+      position: relative;
+      transition: height 0.1s, opacity 0.2s;
+      flex: 0 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 20px;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: visible;
+    }
+
+
+    .block-label {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translate(-50%, -100%);
+      color: var(--paper-cream);
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      animation: label-fade 2.2s ease forwards;
+      text-shadow: 0 0 6px rgba(17,24,32,0.6);
+      background: rgba(17,24,32,0.65);
+      border: 1px solid rgba(241,235,217,0.15);
+      padding: 4px 8px;
+      border-radius: 10px;
+      z-index: 30;
+    }
+    @keyframes label-fade {
+      0% { opacity: 0; transform: translate(-50%, -80%); }
+      25% { opacity: 0.8; transform: translate(-50%, -110%); }
+      100% { opacity: 0; transform: translate(-50%, -140%); }
+    }
+
+    .building.dragging {
+      z-index: 50;
+      opacity: 0.9;
+      box-shadow: 0 0 20px rgba(241, 235, 217, 0.15);
+      cursor: grabbing;
+    }
+    .building.dragging::after {
+      content: "";
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 78px;
+      height: 14px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='78' height='14' viewBox='0 0 78 14'><path d='M12 7 L66 7' stroke='%23f4eddc' stroke-width='1.4' stroke-dasharray='4 3' fill='none'/><path d='M12 7 L16 4 M12 7 L16 10' stroke='%23f4eddc' stroke-width='1.4' fill='none'/><path d='M66 7 L62 4 M66 7 L62 10' stroke='%23f4eddc' stroke-width='1.4' fill='none'/></svg>");
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+    .building.drop-in {
+      animation: drop-in 0.7s cubic-bezier(0.2, 0.9, 0.2, 1.05);
+    }
+    @keyframes drop-in {
+      0% { transform: translateY(-70px); opacity: 0; }
+      70% { transform: translateY(6px); opacity: 1; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    .close-building-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 26px;
+      height: 26px;
+      background-color: rgba(17, 24, 32, 0.6);
+      color: var(--paper-cream);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s, background-color 0.2s;
+      z-index: 20;
+      border: 1px solid rgba(241, 235, 217, 0.3);
+    }
+
+    .building:hover .close-building-btn {
+      opacity: 1;
+    }
+    .building:hover .close-building-btn::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+    }
+
+    .close-building-btn:hover {
+      background-color: rgba(220, 50, 50, 0.8);
+    }
+
+    .line-fill {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      bottom: 24px;
+      opacity: 0.7;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      z-index: 1;
+      background-size: 1200px 1200px;
+    }
+    .is-playing .line-fill {
+      animation-name: line-glow;
+      animation-duration: 2.4s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+    }
+    @keyframes line-glow {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+    .building[data-category="atmosphere"] .line-fill {
+      background-image: var(--line-pattern);
+    }
+    .building[data-category="activity"] .line-fill {
+      background-image: var(--line-pattern);
+    }
+    .building[data-category="infrastructure"] .line-fill {
+      background-image: var(--line-pattern);
+    }
+    .is-playing .line-flow-v {
+      animation: flowV 16s linear infinite;
+    }
+    .is-playing .line-flow-h {
+      animation: flowH 16s linear infinite;
+    }
+    .is-playing .line-flow-d {
+      animation: flowD 16s linear infinite;
+    }
+    @keyframes flowV {
+      from { background-position: 0 0; }
+      to { background-position: 1000px 0; }
+    }
+    @keyframes flowH {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+    @keyframes flowD {
+      from { background-position: 0 0; }
+      to { background-position: 1000px 1000px; }
+    }
+
+    .track-name {
+      color: var(--paper-cream);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.95;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 2;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+      background: rgba(17,24,32,0.6);
+      border: 1px solid rgba(241,235,217,0.2);
+      padding: 4px 3px;
+      border-radius: 8px;
+    }
+
+ .info-modal {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 20% 10%, rgba(91,117,134,0.22), rgba(17,24,32,0.75) 55%),
+              rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+    .info-modal.show { opacity: 1; pointer-events: auto; }
+
+    .info-content {
+  position: relative;
+  background: linear-gradient(180deg, #111822 0%, #151e2a 60%, #16202c 100%);
+  color: #f1ebd9;
+  width: min(720px, 92vw);  
+  max-height: 88vh;          
+  overflow-y: auto;          
+  padding: 30px 34px 34px;
+  border-radius: 10px;
+  line-height: 1.7;
+  border: 2px solid rgba(241,235,217,0.22);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(241,235,217,0.12);
+}
+/* 手機優化 */
+@media (max-width: 600px) {
+  .info-content {
+    width: 94vw;
+    max-height: 86vh;
+    padding: 22px;
+  }
+}
+.upload-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.upload-modal.show { display: flex; opacity: 1; pointer-events: auto; }
+.upload-content {
+  position: relative;
+  background: linear-gradient(180deg, #111822 0%, #151e2a 60%, #16202c 100%);
+  color: #f1ebd9;
+  width: min(520px, 92vw);
+  padding: 26px 28px 28px;
+  border-radius: 10px;
+  line-height: 1.6;
+  border: 2px solid rgba(241,235,217,0.22);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(241,235,217,0.12);
+}
+.upload-content input[type="file"] {
+  width: 100%;
+  margin: 14px 0 10px;
+  color: var(--paper-cream);
+}
+.upload-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #111820;
+  color: #f1ebd9;
+  border: 1px solid rgba(241,235,217,0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+.upload-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+    .close-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(241,235,217,0.1);
+      border: 1px solid rgba(241,235,217,0.25);
+      color: var(--paper-cream);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.2s, opacity 0.2s;
+    }
+    .close-btn:hover {
+      background: rgba(220, 50, 50, 0.85);
+      transform: scale(1.05);
+      opacity: 1;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="title" id="titleBtn"><span class="title-main">SOUND BRICKS</span><span class="title-sub">city asmr</span></div>
+  <div class="status" id="statusText">TAP THE EAR TO PLAY</div>
+
+  <div class="ear-container" id="earContainer">
+    <svg viewBox="0 0 100 100" class="ear-btn" id="generateBtn" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 15 C30 15 18 30 18 50 C18 65 28 75 28 85 C28 95 38 95 42 95 C48 95 48 85 42 80 C36 75 28 70 28 50 C28 35 38 25 50 25 C65 25 72 35 72 50 C72 62 65 72 55 72 C48 72 45 65 48 58 C50 50 58 45 58 38 C58 32 54 28 50 28 C45 28 42 32 42 38 L42 50" 
+            fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="50" cy="50" r="3" fill="currentColor"/>
+    </svg>
+    <div class="radial-menu" id="radialMenu">
+      <div class="radial-item" data-category="atmosphere">Atmosphere</div>
+      <div class="radial-item" data-category="activity">Activity</div>
+      <div class="radial-item" data-category="infrastructure">Infrastructure</div>
+      <div class="radial-item" data-category="random">Random</div>
+    </div>
+  </div>
+
+  <div class="stars-container" id="starsContainer"></div>
+  <svg class="sound-waves" id="soundWaves" viewBox="0 0 800 140" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <div class="bottom-hint" id="bottomHint">Long-press the ear to place a block</div>
+
+  <div class="cityscape" id="cityscape"></div>
+
+  <div class="info-modal" id="infoModal">
+    <div class="info-content">
+      <button class="close-btn" id="closeBtn">×</button>
+      <h2>About This Project</h2>
+
+<p>
+<strong>SOUND BRICKS</strong> 是一座生成式城市聲景的遊樂場。<br>
+Here, the city isn’t recorded — it’s constructed from sound.
+</p>
+
+<p>
+每一棟建築都是聲音積木，你在聽覺中拼起城市的質感與輪廓。<br>
+You are composing a city through listening.
+</p>
+
+<hr>
+
+<h3>How to Play / 操作方式</h3>
+<ul>
+  <li><strong>Tap the Ear</strong> — 生成一棟聲音建築（最多 10）。</li>
+  <li><strong>Spatial Sound</strong> — 左右位置影響左右耳的聲像。</li>
+  <li><strong>Drag Buildings</strong><br>
+    ↕ 高度 = 音量<br>
+    ↔ 位置 = 立體聲空間
+  </li>
+  <li><strong>Long Press Ear</strong> — 長按 0.8 秒可切換積木類別：Atmosphere / Activity / Infrastructure。</li>
+  <li><strong>Remove</strong> — 點 × 拆除建築。</li>
+</ul>
+
+<hr>
+
+<h3>Support This Sonic City / 支持計畫</h3>
+
+<p>
+sound bricks - city asmr 是一個持續發展的獨立聲音藝術計畫。<br>
+exploring how listening can become a form of spatial creation.<br>
+Your support helps this city keep growing.
+</p>
+
+<p>
+Support helps:
+<br>• 擴充生成式聲音模組
+<br>• 開發更多互動系統
+<br>• 支持獨立聲音藝術研究
+</p>
+
+<p style="text-align:center; margin-top:18px;">
+  ☕ <a href="https://buymeacoffee.com/wusiouming" target="_blank" style="
+      display:inline-block;
+      padding:10px 18px;
+      background:#111820;
+      color:#f1ebd9;
+      text-decoration:none;
+      border-radius:4px;
+      letter-spacing:1px;">
+      Support This Project
+  </a>
+</p>
+
+<hr>
+
+<p style="font-size:0.85rem; opacity:0.75; text-align:center;">
+Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" target="_blank" style="color:#f1ebd9; text-decoration:none;">wusiouming</a>
+</p>
+    </div>
+  </div>
+
+  <div class="upload-modal" id="uploadModal">
+    <div class="upload-content">
+      <button class="close-btn" id="uploadCloseBtn">×</button>
+      <h3>Upload Bricks</h3>
+      <p>Upload your own sound file. It will be blended into the city and the cat will disappear after upload.</p>
+      <input type="file" id="uploadInput" accept="audio/*">
+      <button class="upload-btn" id="uploadConfirmBtn" disabled>Use This Sound</button>
+    </div>
+  </div>
+
+  <script>
+  /* ===== 1. 說明視窗邏輯 ===== */
+  const titleBtn = document.getElementById("titleBtn");
+  const infoModal = document.getElementById("infoModal");
+  const closeBtn = document.getElementById("closeBtn");
+  const uploadModal = document.getElementById("uploadModal");
+  const uploadCloseBtn = document.getElementById("uploadCloseBtn");
+  const uploadInput = document.getElementById("uploadInput");
+  const uploadConfirmBtn = document.getElementById("uploadConfirmBtn");
+
+  titleBtn.addEventListener("click", () => infoModal.classList.add("show"));
+  closeBtn.addEventListener("click", () => infoModal.classList.remove("show"));
+  infoModal.addEventListener("click", (e) => { if (e.target === infoModal) infoModal.classList.remove("show"); });
+  const closeUploadModal = () => {
+    uploadModal.classList.remove("show");
+    uploadInput.value = "";
+    uploadConfirmBtn.disabled = true;
+  };
+  uploadCloseBtn.addEventListener("click", closeUploadModal);
+  uploadModal.addEventListener("click", (e) => { if (e.target === uploadModal) closeUploadModal(); });
+
+  /* ===== 輔助函式 ===== */
+  const getNextOrganicTime = (min, max) => min + Math.random() * (max - min);
+
+  /* ===== 2. 核心引擎 ===== */
+  class SoundscapeEngine {
+    constructor() {
+      this.started = false;
+      this.masterVol = new Tone.Volume(-Infinity).toDestination();
+      this.limiter = new Tone.Limiter(-1).connect(this.masterVol);
+      this.compressor = new Tone.Compressor({ threshold: -24, ratio: 3.5, attack: 0.01, release: 0.15 }).connect(this.limiter);
+      this.eq = new Tone.EQ3({ low: 2, mid: -0.5, high: 2.5 }).connect(this.compressor);
+      this.reverb = new Tone.Reverb({ decay: 4.5, wet: 0.3 }).connect(this.eq);
+      this.instances = [];
+    }
+    async start() {
+      await Tone.start();
+      await this.reverb.generate();
+      this.started = true;
+    }
+    removeInstance(inst) {
+      const idx = this.instances.indexOf(inst);
+      if (idx > -1) {
+        this.instances.splice(idx, 1);
+        this.updateAllPans(); 
+      }
+    }
+    updateAllPans() {
+      const buildings = document.querySelectorAll('.building');
+      buildings.forEach((el, index) => {
+        const inst = this.instances.find(i => i.el === el);
+        if (inst) {
+          const rect = el.getBoundingClientRect();
+          const cityRect = document.getElementById('cityscape').getBoundingClientRect();
+          const center = rect.left + rect.width / 2;
+          const relativePos = (center - cityRect.left) / cityRect.width; 
+          const panValue = (relativePos * 2) - 1; 
+          inst.panner.pan.rampTo(panValue, 0.5);
+        }
+      });
+    }
+    ensure(type, Cls, opts) {
+      const inst = new Cls({ engine: this, ...opts });
+      this.instances.push(inst);
+      return inst;
+    }
+    setPlaying(on) {
+      this.instances.forEach((inst) => {
+        if (typeof inst.setPlaying === "function") inst.setPlaying(on);
+      });
+    }
+  }
+
+  class BaseSource {
+    constructor(opts) {
+      this.engine = opts.engine;
+      this.type = opts.type;
+      this.intensity = opts.intensity;
+      this.el = opts.el || null;
+      this.active = true;
+      this.channel = new Tone.Channel().connect(this.engine.reverb);
+      this.panner = new Tone.Panner(0).connect(this.channel);
+      this.events = [];
+      this.setIntensity(this.intensity);
+    }
+    safeSetPan(val, time) { this.panner.pan.setValueAtTime(Math.max(-1, Math.min(1, val)), time); }
+    safeRampPan(val, time) { this.panner.pan.linearRampToValueAtTime(Math.max(-1, Math.min(1, val)), time); }
+    setIntensity(val) { this.intensity = Math.max(0, Math.min(1, val)); this.updateVolume(); }
+    updateVolume() {
+      if (this.intensity < 0.01) {
+        this.channel.volume.rampTo(-Infinity, 0.1);
+      } else {
+        const perceivedVal = Math.pow(this.intensity, 0.45);
+        const boosted = Math.min(1, perceivedVal * 1.2);
+        this.channel.volume.rampTo(Tone.gainToDb(boosted), 0.1);
+      }
+    }
+    scheduleNext(callback, min, max) {
+      const nextTime = `+${min + Math.random() * (max - min)}`;
+      const eventId = Tone.Transport.scheduleOnce((time) => {
+        if(this.active && this.intensity >= 0.01) callback(time);
+        this.scheduleNext(callback, min, max);
+      }, nextTime);
+      this.events.push(eventId);
+    }
+    dispose() {
+      this.active = false;
+      this.events.forEach(id => Tone.Transport.clear(id));
+      if(this.channel) this.channel.dispose();
+      if(this.panner) this.panner.dispose();
+    }
+  }
+
+  /* ===== 3. 音色實作 ===== */
+  class Wind extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("pink").start(); this.lp = new Tone.Filter(400); this.noise.chain(this.lp, this.channel); } }
+  class Rain extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("pink").start(); this.lp = new Tone.Filter(1200); this.noise.chain(this.lp, this.channel); } }
+  class Birds extends BaseSource {
+    constructor(opts) {
+      super(opts);
+      this.osc = new Tone.Oscillator({ type: "sine" }).start();
+      this.env = new Tone.AmplitudeEnvelope({ attack: 0.01, decay: 0.1, sustain: 0 });
+      this.osc.chain(this.env, this.channel);
+
+      this.triggerCall = (time) => {
+        this.panner.pan.cancelScheduledValues(time);
+        this.panner.pan.setValueAtTime((Math.random() * 2) - 1, time);
+
+        const count = Math.floor(Math.random() * 3) + 1;
+        let offset = 0;
+        const baseF = 2800 + Math.random() * 1500;
+        for(let i=0; i<count; i++) {
+          const t = time + offset;
+          const vol = 0.4 + Math.random() * 0.6;
+          this.osc.frequency.setValueAtTime(baseF + (Math.random()*200), t);
+          this.osc.frequency.exponentialRampToValueAtTime(baseF + 800, t + 0.05);
+          this.env.triggerAttackRelease(0.1, t, vol);
+          offset += getNextOrganicTime(0.1, 0.3);
+        }
+      };
+      this.scheduleNext(this.triggerCall, 3, 10);
+    }
+    dispose(){ super.dispose(); this.osc.dispose(); this.env.dispose(); }
+  }
+  class Waves extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("pink").start(); this.lp = new Tone.Filter(800); this.lfo = new Tone.LFO(0.08, 200, 800).start().connect(this.lp.frequency); this.noise.chain(this.lp, this.channel); } }
+  class Insects extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("white").start(); this.bp = new Tone.Filter(4500, "bandpass"); this.trem = new Tone.Tremolo(15, 0.8).start(); this.env = new Tone.AmplitudeEnvelope({ attack: 1.5, release: 4 }); this.noise.chain(this.bp, this.trem, this.env, this.channel); this.triggerChirp = (time) => this.env.triggerAttackRelease(8, time); this.scheduleNext(this.triggerChirp, 5, 15); } }
+  class Train extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("brown").start(); this.env = new Tone.AmplitudeEnvelope({ attack: 2.2, sustain: 1, release: 4.5 }); this.lp = new Tone.Filter(240); this.noise.chain(this.lp, this.env, this.channel); this.rumble = new Tone.Oscillator(55, "sine").start(); this.rumbleGain = new Tone.Gain(0.18).connect(this.channel); this.rumble.connect(this.rumbleGain); this.triggerTrain = (time) => { this.env.triggerAttackRelease(9, time, 0.7); this.rumbleGain.gain.setValueAtTime(0.12, time); this.rumbleGain.gain.linearRampToValueAtTime(0.25, time + 3); this.rumbleGain.gain.linearRampToValueAtTime(0.1, time + 9); }; this.scheduleNext(this.triggerTrain, 22, 45); } dispose(){ super.dispose(); this.noise.dispose(); this.rumble.dispose(); this.rumbleGain.dispose(); } }
+  class TrafficHorn extends BaseSource {
+    constructor(opts) {
+      super(opts);
+      this.synth = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: "sawtooth" },
+        envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.3 }
+      });
+      this.filter = new Tone.Filter({ type: "lowpass", frequency: 2000, Q: 2 });
+      this.synth.chain(this.filter, this.channel);
+
+      this.triggerHonk = (time) => {
+        const startPan = (Math.random() * 2) - 1;
+        const moveAmount = (Math.random() * 0.4) - 0.2;
+        const duration = 0.15 + Math.random() * 0.6;
+        const endPan = Math.max(-1, Math.min(1, startPan + moveAmount));
+
+        this.panner.pan.cancelScheduledValues(time);
+        this.panner.pan.setValueAtTime(startPan, time);
+        this.panner.pan.linearRampToValueAtTime(endPan, time + duration);
+
+        const baseFreq = 250 + Math.random() * 200;
+        const interval = baseFreq * (1.1 + Math.random() * 0.15);
+        const vol = 0.2 + Math.random() * 0.5;
+        this.synth.triggerAttackRelease([baseFreq, interval], duration, time, vol);
+      };
+      this.scheduleNext(this.triggerHonk, 4, 15);
+    }
+    dispose(){ super.dispose(); this.synth.dispose(); this.filter.dispose(); }
+  }
+  class Footsteps extends BaseSource {
+    constructor(opts) {
+      super(opts);
+      this.kick = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 2, envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }});
+      this.scrape = new Tone.NoiseSynth({ noise: { type: "pink" }, envelope: { attack: 0.01, decay: 0.05, sustain: 0 }});
+      this.lp = new Tone.Filter({ type: "lowpass", frequency: 900 });
+      this.kick.chain(this.lp, this.channel);
+      this.scrape.chain(this.lp, this.channel);
+
+      this.triggerStepSequence = (time) => {
+        const stepCount = 4 + Math.floor(Math.random() * 6);
+        const startPan = Math.random() > 0.5 ? -0.8 - Math.random()*0.2 : 0.8 + Math.random()*0.2;
+        const endPan = -startPan * (0.5 + Math.random() * 0.5);
+
+        this.panner.pan.cancelScheduledValues(time);
+        this.panner.pan.setValueAtTime(startPan, time);
+        const totalDuration = stepCount * 0.45;
+        this.panner.pan.linearRampToValueAtTime(endPan, time + totalDuration);
+
+        let offset = 0;
+        for (let i = 0; i < stepCount; i++) {
+          const t = time + offset;
+          const distanceMod = Math.sin((i / (stepCount - 1)) * Math.PI);
+          const vol = (0.2 + distanceMod * 0.6) * (0.8 + Math.random() * 0.4);
+          const pitch = 40 + Math.random() * 20;
+          this.kick.triggerAttackRelease(pitch, "16n", t, vol);
+          this.scrape.triggerAttackRelease("32n", t, vol * 0.3);
+          offset += 0.4 + (Math.random() * 0.1 - 0.05);
+        }
+      };
+      this.scheduleNext(this.triggerStepSequence, 5, 12);
+    }
+    dispose(){ super.dispose(); this.kick.dispose(); this.scrape.dispose(); this.lp.dispose(); }
+  }
+  class Crowd extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.player = new Tone.Player({ url: "Crowd.mp3", loop: true, autostart: false });
+      this.player.connect(this.channel);
+      this.player.playbackRate = 0.96 + Math.random() * 0.08;
+    }
+    setPlaying(on) {
+      if (on) this.player.start();
+      else this.player.stop();
+    }
+    dispose(){ super.dispose(); this.player.dispose(); }
+  }
+    class gym01 extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.player = new Tone.Player({ url: "gym_01.mp3", loop: true, autostart: false });
+      this.player.connect(this.channel);
+      this.player.playbackRate = 0.96 + Math.random() * 0.08;
+    }
+    setPlaying(on) {
+      if (on) this.player.start();
+      else this.player.stop();
+    }
+    dispose(){ super.dispose(); this.player.dispose(); }
+  }
+    class street01 extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.player = new Tone.Player({ url: "street_01.mp3", loop: true, autostart: false });
+      this.player.connect(this.channel);
+      this.player.playbackRate = 0.96 + Math.random() * 0.08;
+    }
+    setPlaying(on) {
+      if (on) this.player.start();
+      else this.player.stop();
+    }
+    dispose(){ super.dispose(); this.player.dispose(); }
+  }
+  class CityDrone extends BaseSource { constructor(opts){ super(opts); this.osc = new Tone.Oscillator(55, "triangle").start(); this.lp = new Tone.Filter(100).connect(this.channel); this.osc.connect(this.lp); } }
+  class CityEvents extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.pad = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: "triangle" },
+        envelope: { attack: 1.2, decay: 0.8, sustain: 0.6, release: 2.2 }
+      }).connect(this.channel);
+      this.triggerEvent = (time) => {
+        const base = 196 + Math.random() * 40;
+        this.pad.triggerAttackRelease([base, base * 1.25, base * 1.5], 4, time, 0.35);
+      };
+      this.scheduleNext(this.triggerEvent, 18, 36);
+    }
+    dispose(){ super.dispose(); this.pad.dispose(); }
+  }
+  class Thunder extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("brown").start(); this.lp = new Tone.Filter(200); this.env = new Tone.AmplitudeEnvelope({ attack: 0.5, release: 3 }); this.noise.chain(this.lp, this.env, this.channel); this.triggerCall = (time) => { const hits = 1 + Math.floor(Math.random() * 2); for (let i = 0; i < hits; i++) { const t = time + (i === 0 ? 0 : 0.4 + Math.random() * 0.8); this.env.triggerAttackRelease(3, t, 0.7); } }; this.scheduleNext(this.triggerCall, 15, 40); } dispose(){ super.dispose(); this.noise.dispose(); } }
+  class River extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("pink").start(); this.bp = new Tone.Filter(600, "bandpass").connect(this.channel); this.noise.connect(this.bp); } dispose(){ super.dispose(); this.noise.dispose(); } }
+  class Leaves extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("white").start(); this.lp = new Tone.Filter(1500); this.env = new Tone.AmplitudeEnvelope({ attack: 0.5, release: 1 }); this.noise.chain(this.lp, this.env, this.channel); this.triggerCall = (time) => this.env.triggerAttackRelease(1, time, 0.4); this.scheduleNext(this.triggerCall, 4, 12); } dispose(){ super.dispose(); this.noise.dispose(); } }
+  class Fire extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("brown").start(); this.lp = new Tone.Filter(350).connect(this.channel); this.noise.connect(this.lp); this.crackle = new Tone.Noise("white").start(); this.crackleFilter = new Tone.Filter(2600, "bandpass").connect(this.channel); this.crackleGain = new Tone.Gain(0.24).connect(this.crackleFilter); this.crackleEnv = new Tone.AmplitudeEnvelope({ attack: 0.003, decay: 0.08, sustain: 0 }).connect(this.crackleGain); this.crackle.connect(this.crackleEnv); this.sizzle = new Tone.Noise("pink").start(); this.sizzleFilter = new Tone.Filter(1500, "highpass").connect(this.channel); this.sizzleGain = new Tone.Gain(0.06).connect(this.sizzleFilter); this.sizzleLfo = new Tone.LFO(0.8, 0.02, 0.11).start().connect(this.sizzleGain.gain); this.sizzle.connect(this.sizzleGain); this.triggerCrackle = (time) => { const bursts = Math.floor(Math.random() * 5) + 3; for (let i = 0; i < bursts; i++) { const t = time + i * (0.05 + Math.random() * 0.05); this.crackleEnv.triggerAttackRelease(0.04, t, 0.55); } }; this.scheduleNext(this.triggerCrackle, 0.12, 0.5); } dispose(){ super.dispose(); this.noise.dispose(); this.crackle.dispose(); this.crackleFilter.dispose(); this.crackleGain.dispose(); this.sizzle.dispose(); this.sizzleFilter.dispose(); this.sizzleGain.dispose(); this.sizzleLfo.dispose(); } }
+  class FloorRumble extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.osc = new Tone.Oscillator(48, "sine").start();
+      this.lfo = new Tone.LFO(0.4, 40, 60).start().connect(this.osc.frequency);
+      this.env = new Tone.AmplitudeEnvelope({ attack: 0.05, decay: 0.1, sustain: 0.7, release: 0.2 }).connect(this.channel);
+      this.osc.connect(this.env);
+      this.triggerPulse = (time) => {
+        const hits = 4 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < hits; i++) {
+          const t = time + i * (0.6 + Math.random() * 0.25);
+          this.env.triggerAttackRelease(0.25, t, 0.45 + Math.random() * 0.2);
+        }
+      };
+      this.scheduleNext(this.triggerPulse, 6, 14);
+    }
+    dispose(){ super.dispose(); this.osc.dispose(); this.lfo.dispose(); this.env.dispose(); }
+  }
+  class BasementEcho extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.noise = new Tone.Noise("brown").start();
+      this.bp = new Tone.Filter({ type: "bandpass", frequency: 140, Q: 1.2 });
+      this.env = new Tone.AmplitudeEnvelope({ attack: 1.2, decay: 1.2, sustain: 0.6, release: 2.2 }).connect(this.channel);
+      this.noise.chain(this.bp, this.env);
+      this.triggerDrone = (time) => {
+        this.bp.frequency.setValueAtTime(120 + Math.random() * 40, time);
+        this.env.triggerAttackRelease(5, time, 0.45);
+      };
+      this.scheduleNext(this.triggerDrone, 12, 24);
+    }
+    dispose(){ super.dispose(); this.noise.dispose(); this.bp.dispose(); this.env.dispose(); }
+  }
+  class GridHum extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.osc = new Tone.Oscillator(60, "triangle").start();
+      this.lfo = new Tone.LFO(0.25, 55, 70).start().connect(this.osc.frequency);
+      this.lp = new Tone.Filter(180, "lowpass").connect(this.channel);
+      this.env = new Tone.AmplitudeEnvelope({ attack: 1.5, decay: 1.2, sustain: 0.7, release: 2.5 }).connect(this.lp);
+      this.osc.connect(this.env);
+      this.triggerHum = (time) => {
+        this.env.triggerAttackRelease(6, time, 0.4);
+      };
+      this.scheduleNext(this.triggerHum, 10, 20);
+    }
+    dispose(){ super.dispose(); this.osc.dispose(); this.lfo.dispose(); this.lp.dispose(); this.env.dispose(); }
+  }
+  class KickTexture extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.kick = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 2, envelope: { attack: 0.005, decay: 0.15, sustain: 0, release: 0.1 }}).connect(this.channel);
+      this.tom = new Tone.MembraneSynth({ pitchDecay: 0.03, octaves: 3, envelope: { attack: 0.005, decay: 0.12, sustain: 0, release: 0.08 }}).connect(this.channel);
+      this.snare = new Tone.NoiseSynth({ noise: { type: "white" }, envelope: { attack: 0.005, decay: 0.08, sustain: 0 }}).connect(this.channel);
+      this.triggerBeat = (time) => {
+        const hits = 6 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < hits; i++) {
+          const t = time + i * (0.28 + Math.random() * 0.08);
+          const roll = Math.random();
+          if (roll < 0.55) this.kick.triggerAttackRelease("C1", "16n", t, 0.5);
+          else if (roll < 0.85) this.tom.triggerAttackRelease("G1", "16n", t, 0.45);
+          else this.snare.triggerAttackRelease("16n", t, 0.25);
+        }
+      };
+      this.scheduleNext(this.triggerBeat, 6, 12);
+    }
+    dispose(){ super.dispose(); this.kick.dispose(); this.tom.dispose(); this.snare.dispose(); }
+  }
+  class StreetAmbience extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.player = new Tone.Player({ url: "street_01.mp3", loop: true, autostart: false });
+      this.player.connect(this.channel);
+      this.player.playbackRate = 0.96 + Math.random() * 0.08;
+    }
+    setPlaying(on) {
+      if (on) this.player.start();
+      else this.player.stop();
+    }
+    dispose(){ super.dispose(); this.player.dispose(); }
+  }
+  class Keyboard extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("pink").start(); this.bp = new Tone.Filter(600, "bandpass"); this.env = new Tone.AmplitudeEnvelope({ attack: 0.01, decay: 0.05 }).connect(this.channel); this.noise.chain(this.bp, this.env); this.triggerType = (time) => { const strokes = 4 + Math.floor(Math.random() * 4); let offset = 0; for(let i=0; i<strokes; i++) { this.env.triggerAttackRelease(0.03, time + offset, 0.4); offset += 0.2 + Math.random() * 0.15; } }; this.scheduleNext(this.triggerType, 4, 10); } dispose(){ super.dispose(); this.noise.dispose(); } }
+  class Clock extends BaseSource { constructor(opts){ super(opts); this.synth = new Tone.MetalSynth({ envelope: { attack: 0.001, decay: 0.05 } }).connect(this.channel); this.triggerTick = (time) => { this.synth.triggerAttackRelease("C4", "32n", time, 0.1); this.synth.triggerAttackRelease("C3", "32n", time + 1, 0.05); }; this.scheduleNext(this.triggerTick, 2, 2); } dispose(){ super.dispose(); this.synth.dispose(); } }
+  class Chimes extends BaseSource { constructor(opts){ super(opts); this.synth = new Tone.PolySynth(Tone.Synth).connect(this.channel); this.triggerChime = (time) => { const count = Math.floor(Math.random() * 2) + 2; const base = 850 + Math.random() * 500; for (let i = 0; i < count; i++) { const t = time + i * (0.08 + Math.random() * 0.08); const freq = base * (1 + Math.random() * 1.2); this.synth.triggerAttackRelease(freq, 0.4, t, 0.3); } }; this.scheduleNext(this.triggerChime, 2, 8); } dispose(){ super.dispose(); this.synth.dispose(); } }
+  class Airplane extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("brown").start(); this.bp = new Tone.Filter(120, "bandpass"); this.env = new Tone.AmplitudeEnvelope({ attack: 3, decay: 4, sustain: 0.6, release: 5 }).connect(this.channel); this.noise.chain(this.bp, this.env); this.triggerFly = (time) => { const dur = 12 + Math.random() * 6; this.bp.frequency.setValueAtTime(120, time); this.bp.frequency.linearRampToValueAtTime(520, time + dur * 0.6); this.bp.frequency.linearRampToValueAtTime(180, time + dur); this.env.triggerAttackRelease(dur, time, 0.65); }; this.scheduleNext(this.triggerFly, 30, 60); } dispose(){ super.dispose(); this.noise.dispose(); } }
+  class Helicopter extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("brown").start(); this.lp = new Tone.Filter(220); this.trem = new Tone.Tremolo(9, 0.85).start(); this.env = new Tone.AmplitudeEnvelope({ attack: 1.2, release: 6 }).connect(this.channel); this.noise.chain(this.lp, this.trem, this.env); this.thump = new Tone.Oscillator(90, "sine").start(); this.thumpEnv = new Tone.AmplitudeEnvelope({ attack: 0.01, decay: 0.08, sustain: 0 }).connect(this.channel); this.thump.connect(this.thumpEnv); this.triggerFly = (time) => { this.env.triggerAttackRelease(11, time, 0.65); const hits = 26 + Math.floor(Math.random() * 10); for (let i = 0; i < hits; i++) { const t = time + i * 0.18; this.thumpEnv.triggerAttackRelease(0.05, t, 0.45); } }; this.scheduleNext(this.triggerFly, 28, 55); } dispose(){ super.dispose(); this.noise.dispose(); this.thump.dispose(); this.thumpEnv.dispose(); } }
+
+  // 動態點綴音色
+  class DoorChime extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.synth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "triangle" }, envelope: { attack: 0.25, decay: 0.6, sustain: 0.35, release: 1.2 } }).connect(this.channel);
+      this.filter = new Tone.Filter({ type: "lowpass", frequency: 2200, Q: 1.2 }).connect(this.channel);
+      this.synth.disconnect();
+      this.synth.connect(this.filter);
+      this.lfo = new Tone.LFO(0.6, 1600, 2600).start().connect(this.filter.frequency);
+      this.triggerChime = (time) => {
+        this.panner.pan.cancelScheduledValues(time);
+        this.panner.pan.setValueAtTime((Math.random() * 1.6) - 0.8, time);
+        const base = 650 + Math.random() * 200;
+        this.synth.triggerAttackRelease([base, base * 1.5], 3, time, 0.35 + Math.random() * 0.25);
+      };
+      this.scheduleNext(this.triggerChime, 8, 18);
+    }
+    dispose(){ super.dispose(); this.synth.dispose(); this.filter.dispose(); this.lfo.dispose(); }
+  }
+  class NeonFlicker extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.synth = new Tone.MetalSynth({ frequency: 200, envelope: { attack: 0.001, decay: 0.08, release: 0.02 }, harmonicity: 5.1, modulationIndex: 20 }).connect(this.channel);
+      this.triggerFlicker = (time) => {
+        this.panner.pan.cancelScheduledValues(time);
+        this.panner.pan.setValueAtTime((Math.random() * 2) - 1, time);
+        const hits = Math.floor(Math.random() * 4) + 2;
+        for (let i = 0; i < hits; i++) {
+          const t = time + i * (0.06 + Math.random() * 0.05);
+          this.synth.triggerAttackRelease("C5", "32n", t, 0.2 + Math.random() * 0.2);
+        }
+      };
+      this.scheduleNext(this.triggerFlicker, 5, 14);
+    }
+    dispose(){ super.dispose(); this.synth.dispose(); }
+  }
+  class DistantCar extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.noise = new Tone.Noise("brown").start();
+      this.bp = new Tone.Filter({ type: "bandpass", frequency: 220, Q: 1.2 });
+      this.env = new Tone.AmplitudeEnvelope({ attack: 2.5, decay: 0.1, sustain: 2.5, release: 3.5 });
+      this.noise.chain(this.bp, this.env, this.channel);
+      this.triggerPass = (time) => {
+        const startPan = Math.random() > 0.5 ? -0.9 : 0.9;
+        const endPan = -startPan * (0.6 + Math.random() * 0.3);
+        const duration = 10 + Math.random() * 6;
+        this.panner.pan.cancelScheduledValues(time);
+        this.panner.pan.setValueAtTime(startPan, time);
+        this.panner.pan.linearRampToValueAtTime(endPan, time + duration);
+        const baseFreq = 160 + Math.random() * 120;
+        this.bp.frequency.setValueAtTime(baseFreq, time);
+        this.bp.frequency.linearRampToValueAtTime(baseFreq + 70, time + duration * 0.5);
+        this.bp.frequency.linearRampToValueAtTime(baseFreq - 50, time + duration);
+        this.env.triggerAttackRelease(duration, time, 0.5 + Math.random() * 0.3);
+      };
+      this.scheduleNext(this.triggerPass, 22, 40);
+    }
+    dispose(){ super.dispose(); this.noise.dispose(); this.bp.dispose(); this.env.dispose(); }
+  }
+  
+  // 優化後的施工聲：低沉的Square波敲擊 + 粉紅噪音的揚塵感
+  class Construction extends BaseSource { 
+    constructor(opts){ 
+      super(opts); 
+      this.membrane = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 4, oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0 } }).connect(this.channel); 
+      this.noise = new Tone.Noise("pink").start(); 
+      this.noiseEnv = new Tone.AmplitudeEnvelope({attack: 0.01, decay: 0.15, sustain: 0}); 
+      this.noiseFilter = new Tone.Filter(1200, "lowpass").connect(this.channel); 
+      this.noise.chain(this.noiseEnv, this.noiseFilter); 
+      this.triggerHit = (time) => { 
+        let hits = Math.floor(Math.random() * 3) + 1; 
+        for(let i=0; i<hits; i++) { 
+          let t = time + i * (0.3 + Math.random() * 0.2); 
+          this.membrane.triggerAttackRelease("G1", "8n", t, 0.5); 
+          this.noiseEnv.triggerAttackRelease(0.1, t, 0.4); 
+        } 
+      }; 
+      this.scheduleNext(this.triggerHit, 5, 20); 
+    } 
+    dispose(){ super.dispose(); this.membrane.dispose(); this.noise.dispose(); this.noiseEnv.dispose(); this.noiseFilter.dispose(); } 
+  }
+  
+  class Siren extends BaseSource { constructor(opts){ super(opts); this.osc = new Tone.Oscillator(400, "sine").start(); this.env = new Tone.AmplitudeEnvelope({ attack: 2, release: 3 }).connect(this.channel); this.osc.connect(this.env); this.triggerSiren = (time) => { this.osc.frequency.setValueAtTime(400, time); this.osc.frequency.linearRampToValueAtTime(600, time + 1.5); this.env.triggerAttackRelease(4, time, 0.2); }; this.scheduleNext(this.triggerSiren, 20, 50); } dispose(){ super.dispose(); this.osc.dispose(); } }
+  class Subway extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("brown").start(); this.lp = new Tone.Filter(300); this.env = new Tone.AmplitudeEnvelope({ attack: 3, release: 4 }).connect(this.channel); this.noise.chain(this.lp, this.env); this.triggerSubway = (time) => this.env.triggerAttackRelease(6, time, 0.5); this.scheduleNext(this.triggerSubway, 25, 60); } dispose(){ super.dispose(); this.noise.dispose(); } }
+  class AC extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("pink").start(); this.lp = new Tone.Filter(200).connect(this.channel); this.noise.connect(this.lp); } dispose(){ super.dispose(); this.noise.dispose(); } }
+  class Fan extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("pink").start(); this.lp = new Tone.Filter(500); this.trem = new Tone.Tremolo(0.5, 0.5).start().connect(this.channel); this.noise.chain(this.lp, this.trem); } dispose(){ super.dispose(); this.noise.dispose(); } }
+  class Vinyl extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("brown").start(); this.lp = new Tone.Filter(800).connect(this.channel); this.noise.connect(this.lp); this.crackle = new Tone.Noise("white").start(); this.crackleFilter = new Tone.Filter(3200, "lowpass").connect(this.channel); this.crackleGain = new Tone.Gain(0.16).connect(this.crackleFilter); this.crackleEnv = new Tone.AmplitudeEnvelope({ attack: 0.001, decay: 0.012, sustain: 0 }).connect(this.crackleGain); this.crackle.connect(this.crackleEnv); this.triggerPop = (time) => { const pops = Math.floor(Math.random() * 3) + 2; for (let i = 0; i < pops; i++) { const t = time + i * (0.03 + Math.random() * 0.03); this.crackleEnv.triggerAttackRelease(0.01, t, 0.25 + Math.random() * 0.2); } }; this.scheduleNext(this.triggerPop, 0.12, 0.6); } dispose(){ super.dispose(); this.noise.dispose(); this.crackle.dispose(); this.crackleFilter.dispose(); this.crackleGain.dispose(); } }
+  class Frogs extends BaseSource {
+    constructor(opts) {
+      super(opts);
+      this.noise = new Tone.Noise("pink").start();
+      this.bp = new Tone.Filter({ type: "bandpass", frequency: 420, Q: 4.2 });
+      this.env = new Tone.AmplitudeEnvelope({ attack: 0.008, decay: 0.06, sustain: 0.1 });
+      this.gain = new Tone.Gain(2.5).connect(this.channel);
+      this.noise.chain(this.bp, this.env, this.gain);
+
+      this.triggerCroak = (time) => {
+        this.panner.pan.cancelScheduledValues(time);
+        this.panner.pan.setValueAtTime((Math.random() * 1.6) - 0.8, time);
+
+        const rndFreq = 320 + Math.random() * 220;
+        this.bp.frequency.setValueAtTime(rndFreq, time);
+        this.env.triggerAttackRelease(0.05, time, 0.65 + Math.random() * 0.55);
+        if(Math.random() > 0.4) {
+          const offset = 0.08 + Math.random() * 0.05;
+          this.env.triggerAttackRelease(0.05, time + offset, 0.55 + Math.random() * 0.55);
+        }
+      };
+      this.scheduleNext(this.triggerCroak, 0.9, 4);
+    }
+    dispose(){ super.dispose(); this.noise.dispose(); this.bp.dispose(); this.env.dispose(); this.gain.dispose(); }
+  }
+  
+  // 優化後的狗吠聲：Sawtooth 頻率快速下滑 + 呼吸噪音
+  class Dogs extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.player = new Tone.Player({ url: "Dogs.mp3", loop: false, autostart: false });
+      this.player.connect(this.channel);
+      this.triggerBark = (time) => {
+        this.panner.pan.cancelScheduledValues(time);
+        this.panner.pan.setValueAtTime((Math.random() * 1.4) - 0.7, time);
+        this.player.playbackRate = 0.92 + Math.random() * 0.16;
+        this.player.start(time);
+      };
+      this.scheduleNext(this.triggerBark, 8, 20);
+    }
+    dispose(){ super.dispose(); this.player.dispose(); }
+  }
+  
+  class Bicycle extends BaseSource { constructor(opts){ super(opts); this.synth = new Tone.MetalSynth().connect(this.channel); this.triggerBell = (time) => { const hits = 4 + Math.floor(Math.random() * 2); for (let i = 0; i < hits; i++) { const t = time + i * (0.12 + Math.random() * 0.08); this.synth.triggerAttackRelease("C5", "16n", t, 0.25 + Math.random() * 0.2); } }; this.scheduleNext(this.triggerBell, 12, 30); } dispose(){ super.dispose(); this.synth.dispose(); } }
+  class RainOnTin extends BaseSource { constructor(opts){ super(opts); this.noise = new Tone.Noise("pink").start(); this.bp = new Tone.Filter(2500, "bandpass").connect(this.channel); this.noise.connect(this.bp); } dispose(){ super.dispose(); this.noise.dispose(); } }
+
+  /* ===== 4. 音色庫總覽 ===== */
+  const SOURCE_REGISTRY = {
+    wind: { cls: Wind, title: "WIND", vol: [0.35, 0.8], category: "atmosphere", label: "Urban Hum" },
+    rain: { cls: Rain, title: "RAIN", vol: [0.45, 0.9], category: "atmosphere", label: "Rain Veil" },
+    birds: { cls: Birds, title: "BIRDS", vol: [0.45, 0.9], category: "activity", label: "Sky Chirp" },
+    waves: { cls: Waves, title: "WAVES", vol: [0.45, 0.8], category: "atmosphere", label: "Wave Drift" },
+    insects: { cls: Insects, title: "INSECTS", vol: [0.3, 0.7], category: "activity", label: "Night Grain" },
+    train: { cls: Train, title: "TRAIN", vol: [0.45, 0.9], category: "infrastructure", label: "Rail Rhythm" },
+    horn: { cls: TrafficHorn, title: "TRAFFIC", vol: [0.4, 0.7], category: "infrastructure", label: "Signal Pulse" },
+    footsteps: { cls: Footsteps, title: "STEPS", vol: [0.7, 1.0], category: "activity", label: "Street Steps" },
+    crowd: { cls: Crowd, title: "CROWD", vol: [0.55, 1.0], category: "activity", label: "Crowd Grain" },
+    street: { cls: StreetAmbience, title: "STREET BED", vol: [0.45, 0.9], category: "infrastructure", label: "Street Bed" },
+    drone: { cls: CityDrone, title: "DRONE", vol: [0.55, 1.0], category: "atmosphere", label: "City Drone" },
+    events: { cls: CityEvents, title: "EVENTS", vol: [0.6, 1.0], category: "activity", label: "City Spark" },
+    neon: { cls: NeonFlicker, title: "NEON", vol: [0.35, 0.7], category: "infrastructure", label: "Neon Flicker" },
+    carpass: { cls: DistantCar, title: "DISTANT CAR", vol: [0.35, 0.7], category: "infrastructure", label: "Distant Car" },
+    thunder: { cls: Thunder, title: "THUNDER", vol: [0.45, 0.95], category: "atmosphere", label: "Thunder Roll" },
+    river: { cls: River, title: "RIVER", vol: [0.45, 0.8], category: "atmosphere", label: "River Flow" },
+    leaves: { cls: Leaves, title: "LEAVES", vol: [0.35, 0.7], category: "atmosphere", label: "Leaf Drift" },
+    fire: { cls: Fire, title: "FIRE", vol: [0.45, 0.9], category: "atmosphere", label: "Ember Hiss" },
+    floorrumble: { cls: FloorRumble, title: "FLOOR NOISE", vol: [0.45, 0.8], category: "infrastructure", label: "Floor Noise" },
+    basement: { cls: BasementEcho, title: "BASEMENT ECHO", vol: [0.4, 0.75], category: "infrastructure", label: "Basement Echo" },
+    gridhum: { cls: GridHum, title: "POWER HUM", vol: [0.35, 0.7], category: "infrastructure", label: "Power Hum" },
+    kicktex: { cls: KickTexture, title: "DISTANT PARTY", vol: [0.35, 0.7], category: "infrastructure", label: "Distant Party" },
+    keyboard: { cls: Keyboard, title: "TYPING", vol: [0.35, 0.7], category: "activity", label: "Key Rhythm" },
+    clock: { cls: Clock, title: "CLOCK", vol: [0.35, 0.7], category: "infrastructure", label: "Clock Pulse" },
+    chimes: { cls: Chimes, title: "CHIMES", vol: [0.4, 0.75], category: "activity", label: "Chime Air" },
+    doorchime: { cls: DoorChime, title: "DOOR CHIME", vol: [0.35, 0.7], category: "activity", label: "Door Chime" },
+    airplane: { cls: Airplane, title: "AIRPLANE", vol: [0.45, 0.9], category: "infrastructure", label: "Air Route" },
+    helicopter: { cls: Helicopter, title: "CHOPPER", vol: [0.4, 0.75], category: "infrastructure", label: "Rotor Sweep" },
+    construction: { cls: Construction, title: "CONSTRUCT", vol: [0.45, 0.9], category: "infrastructure", label: "Build Pulse" },
+    siren: { cls: Siren, title: "SIREN", vol: [0.4, 0.7], category: "infrastructure", label: "Alert Arc" },
+    subway: { cls: Subway, title: "SUBWAY", vol: [0.55, 1.0], category: "infrastructure", label: "Subway Rumble" },
+    ac: { cls: AC, title: "AC HUM", vol: [0.4, 0.7], category: "atmosphere", label: "Air Hum" },
+    fan: { cls: Fan, title: "FAN", vol: [0.4, 0.7], category: "atmosphere", label: "Fan Drift" },
+    vinyl: { cls: Vinyl, title: "VINYL", vol: [0.3, 0.6], category: "atmosphere", label: "Vinyl Dust" },
+    frogs: { cls: Frogs, title: "FROGS", vol: [0.5, 0.9], category: "activity", label: "Pond Pulse" },
+    dogs: { cls: Dogs, title: "DOGS", vol: [0.35, 0.7], category: "activity", label: "Bark Echo" },
+    bicycle: { cls: Bicycle, title: "BICYCLE", vol: [0.4, 0.7], category: "infrastructure", label: "Wheel Ring" },
+    raintin: { cls: RainOnTin, title: "TIN RAIN", vol: [0.45, 0.9], category: "atmosphere", label: "Tin Rain" },
+    street01: { cls: street01, title: "street01", vol: [0.45, 0.9], category: "atmosphere", label: "street01" },
+    gym01: { cls: gym01, title: "gym01", vol: [0.45, 0.9], category: "infrastructure", label: "gym01" }
+  };
+  let CATEGORY_KEYS = {};
+  function rebuildCategoryKeys() {
+    CATEGORY_KEYS = {
+      atmosphere: Object.keys(SOURCE_REGISTRY).filter(k => SOURCE_REGISTRY[k].category === "atmosphere"),
+      activity: Object.keys(SOURCE_REGISTRY).filter(k => SOURCE_REGISTRY[k].category === "activity"),
+      infrastructure: Object.keys(SOURCE_REGISTRY).filter(k => SOURCE_REGISTRY[k].category === "infrastructure")
+    };
+  }
+  rebuildCategoryKeys();
+
+  /* ===== 5. UI 與應用程式邏輯 ===== */
+  let engine = new SoundscapeEngine();
+  const earBtn = document.getElementById("generateBtn");
+  const earContainer = document.getElementById("earContainer");
+  const cityscape = document.getElementById("cityscape");
+  const statusText = document.getElementById("statusText");
+  const radialMenu = document.getElementById("radialMenu");
+  const radialItems = Array.from(radialMenu.querySelectorAll(".radial-item"));
+  const bottomHint = document.getElementById("bottomHint");
+  const soundWaves = document.getElementById("soundWaves");
+  let waveLines = [];
+  function updateWaveLines(count) {
+    const current = waveLines.length;
+    if (count === current) return;
+    if (count > current) {
+      for (let i = current; i < count; i++) {
+        const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        p.setAttribute("class", "wave-line");
+        soundWaves.appendChild(p);
+        waveLines.push(p);
+      }
+    } else {
+      for (let i = current - 1; i >= count; i--) {
+        waveLines[i].remove();
+        waveLines.pop();
+      }
+    }
+  }
+
+  const MAX_BUILDINGS = 10;
+
+  const setStatus = (text, color = null) => {
+    statusText.textContent = text;
+    statusText.style.color = color || "var(--accent)";
+  };
+
+  let waveFrame = 0;
+  function updateWaveform() {
+    waveFrame = (waveFrame + 1) % 3;
+    if (waveFrame !== 0) {
+      requestAnimationFrame(updateWaveform);
+      return;
+    }
+    if (!isAudioPlaying) {
+      const baseY = 50;
+      const gap = 10;
+      waveLines.forEach((line, i) => {
+        const y = baseY + i * gap;
+        line.setAttribute("d", `M0,${y} Q200,${y} 400,${y} T800,${y}`);
+      });
+      requestAnimationFrame(updateWaveform);
+      return;
+    }
+    const buildingCount = engine.instances.length;
+    const targetLines = Math.min(8, Math.max(1, Math.ceil(buildingCount / 2)));
+    updateWaveLines(targetLines);
+    const level = Math.max(0, Math.min(1, engine.instances.reduce((sum, inst) => sum + inst.intensity, 0) / 6));
+    const shift = (level * 16 - 8).toFixed(2) + "%";
+    document.documentElement.style.setProperty("--bg-shift", shift);
+    const t = performance.now() * 0.0012;
+    const baseY = 50;
+    const gap = 10;
+    waveLines.forEach((line, i) => {
+      const amp = (6 + level * 18) + (i % 3) * 4;
+      const phase = t * (1 + i * 0.08) + i;
+      const y = baseY + i * gap;
+      const p = Math.sin(phase) * amp;
+      line.setAttribute("d", `M0,${y} Q200,${y - p} 400,${y} T800,${y}`);
+      line.style.opacity = (0.25 + i * 0.03).toFixed(2);
+    });
+    requestAnimationFrame(updateWaveform);
+  }
+
+  // 初始化星空
+  const starsContainer = document.getElementById("starsContainer");
+  for (let i = 0; i < 60; i++) {
+    const star = document.createElement("div");
+    star.className = "star";
+    const size = Math.random() * 2 + 1;
+    star.style.width = size + "px"; star.style.height = size + "px";
+    star.style.left = Math.random() * 100 + "%"; star.style.top = Math.random() * 100 + "%";
+    star.style.animationDuration = (Math.random() * 3 + 2) + "s";
+    star.style.animationDelay = (Math.random() * 5) + "s";
+    starsContainer.appendChild(star);
+  }
+  updateWaveform();
+
+
+  // 小貓咪動畫元素
+  const catEl = document.createElement("div");
+  catEl.id = "rooftop-cat";
+  document.body.appendChild(catEl);
+  let catDisabledUntil = 0;
+  const isCatDisabled = () => Date.now() < catDisabledUntil;
+  const disableCatTemporarily = () => {
+    const delay = 60000 + Math.random() * 60000;
+    catDisabledUntil = Date.now() + delay;
+    catEl.style.opacity = 0;
+    setTimeout(() => {
+      if (!isCatDisabled()) startCatSequence();
+    }, delay + 50);
+  };
+
+  function getCompletionScore() {
+    const buildings = Array.from(document.querySelectorAll('.building'));
+    if (buildings.length === 0) return 0;
+    const heights = buildings.map(b => parseFloat(b.style.height) || 0);
+    const avg = heights.reduce((a,b) => a + b, 0) / heights.length;
+    const variance = heights.reduce((a,b) => a + Math.pow(b - avg, 2), 0) / heights.length;
+    const heightVar = Math.sqrt(variance) / 100; // 0..~1
+    const density = Math.min(1, buildings.length / MAX_BUILDINGS);
+    return Math.max(0, Math.min(1, density * 0.7 + heightVar * 0.3));
+  }
+
+  const MAX_CUSTOM = 3;
+  let customCount = 0;
+  function registerCustomSample(file) {
+    if (customCount >= MAX_CUSTOM) {
+      setStatus("CUSTOM LIMIT REACHED", "#ff6b6b");
+      setTimeout(() => setStatus(isAudioPlaying ? "LONG-PRESS EAR TO PLACE A BLOCK" : "TAP THE EAR TO PLAY"), 2000);
+      return null;
+    }
+    const customSampleUrl = URL.createObjectURL(file);
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+    const label = baseName ? baseName.toUpperCase() : `CUSTOM ${customCount + 1}`;
+    const key = `custom_${customCount + 1}`;
+    SOURCE_REGISTRY[key] = {
+      cls: class CustomSample extends BaseSource {
+        constructor(opts){
+          super(opts);
+          this.player = new Tone.Player({ url: customSampleUrl, loop: true, autostart: false });
+          this.player.connect(this.channel);
+        }
+        setPlaying(on) {
+          if (on) this.player.start();
+          else this.player.stop();
+        }
+        dispose(){ super.dispose(); this.player.dispose(); }
+      },
+      title: "CUSTOM",
+      vol: [0.45, 0.9],
+      category: "atmosphere",
+      label: label
+    };
+    customCount += 1;
+    rebuildCategoryKeys();
+    return key;
+  }
+
+  const openUploadModal = (e) => {
+    if (isCatDisabled()) return;
+    e.stopPropagation();
+    uploadModal.classList.add("show");
+  };
+  catEl.addEventListener("pointerdown", openUploadModal);
+  catEl.addEventListener("click", openUploadModal);
+
+  radialItems.forEach((item) => {
+    item.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectedCategory = item.dataset.category;
+      hideRadialMenu();
+      longPressActive = false;
+      const chosen = selectedCategory === "random" ? null : (selectedCategory || "atmosphere");
+      requestBuilding(chosen);
+    });
+  });
+
+  uploadInput.addEventListener("change", () => {
+    uploadConfirmBtn.disabled = !uploadInput.files || uploadInput.files.length === 0;
+  });
+
+  uploadConfirmBtn.addEventListener("click", async () => {
+    const file = uploadInput.files && uploadInput.files[0];
+    if (!file) return;
+    const key = registerCustomSample(file);
+    if (!key) return;
+    closeUploadModal();
+    disableCatTemporarily();
+    await requestBuildingByKey(key);
+  });
+
+  function startCatSequence() {
+    if (isCatDisabled()) return;
+    const buildings = Array.from(document.querySelectorAll('.building'));
+    // 只有當房子超過2棟時才表演跳躍
+    if (buildings.length < 2) {
+      setTimeout(startCatSequence, 20000);
+      return;
+    }
+    const completion = getCompletionScore();
+
+    const goRight = Math.random() > 0.5;
+    if (!goRight) buildings.reverse();
+    
+    // 隨機決定是橘貓還是黑貓
+    catEl.textContent = Math.random() > 0.5 ? "🐈" : "🐈‍⬛";
+    catEl.style.opacity = 1;
+    let currentIdx = 0;
+
+    const jumpToNext = () => {
+      if (isCatDisabled()) {
+        catEl.style.opacity = 0;
+        return;
+      }
+      // 若跳完所有房子，隱藏貓咪並重新計時下次出現
+      if (currentIdx >= buildings.length) {
+        catEl.style.opacity = 0;
+        const nextMin = 30000 + (1 - completion) * 40000;
+        const nextMax = 70000 + (1 - completion) * 60000;
+        setTimeout(startCatSequence, getNextOrganicTime(nextMin, nextMax));
+        return;
+      }
+
+      const b = buildings[currentIdx];
+      const rect = b.getBoundingClientRect();
+      const targetX = rect.left + rect.width / 2;
+      const targetY = rect.top;
+
+      if (currentIdx === 0) {
+        // 第一次出現：直接定位
+        catEl.style.left = targetX + 'px';
+        catEl.style.top = targetY + 'px';
+        catEl.style.transform = `translate(-50%, -100%) scaleX(${goRight ? -1 : 1})`;
+        currentIdx++;
+        const pause = 900 + Math.random() * 900 + completion * 600;
+        setTimeout(jumpToNext, pause);
+      } else {
+        // 後續：跳躍動畫
+        const prevB = buildings[currentIdx - 1];
+        const prevRect = prevB.getBoundingClientRect();
+        const startX = prevRect.left + prevRect.width / 2;
+        const startY = prevRect.top;
+
+        // 拋物線頂點
+        const jumpHeight = Math.min(startY, targetY) - 50;
+        const duration = 400 + Math.random() * 200;
+
+        // X軸水平線性移動
+        catEl.animate([{ left: startX + 'px' }, { left: targetX + 'px' }], { duration, easing: 'linear' });
+
+        // Y軸拋物線移動 (先減速上拋、後加速下墜)
+        const yAnim = catEl.animate([
+          { top: startY + 'px', easing: 'ease-out' },
+          { top: jumpHeight + 'px', easing: 'ease-in' },
+          { top: targetY + 'px' }
+        ], { duration });
+
+        yAnim.onfinish = () => {
+          catEl.style.left = targetX + 'px';
+          catEl.style.top = targetY + 'px';
+          currentIdx++;
+          const idleChance = Math.random();
+          let extraPause = 300 + Math.random() * 800;
+          if (idleChance < (0.25 + completion * 0.35)) {
+            extraPause += 1200 + Math.random() * (1200 + completion * 1200); // 作品更完整時更常發呆
+          }
+          if (idleChance > 0.6) {
+            const lookBack = goRight ? 1 : -1;
+            catEl.style.transform = `translate(-50%, -100%) scaleX(${lookBack})`;
+            setTimeout(() => {
+              catEl.style.transform = `translate(-50%, -100%) scaleX(${goRight ? -1 : 1})`;
+            }, 600 + Math.random() * 500);
+          }
+          setTimeout(jumpToNext, extraPause);
+        };
+      }
+    };
+    jumpToNext();
+  }
+  // 啟動後 15 秒開始嘗試叫喚小貓
+  setTimeout(startCatSequence, 30000);
+
+  let longPressTimer = null;
+  let longPressActive = false;
+  let suppressNextClick = false;
+  let selectedCategory = null;
+  let hintTimer = null;
+  let isAudioPlaying = false;
+
+  function setActiveCategory(cat) {
+    selectedCategory = cat;
+    radialItems.forEach((item) => {
+      item.classList.toggle("active", item.dataset.category === cat);
+    });
+  }
+  function showRadialMenu() {
+    radialMenu.classList.add("show");
+  }
+  function hideRadialMenu() {
+    radialMenu.classList.remove("show");
+    radialItems.forEach((item) => item.classList.remove("active"));
+  }
+  function updateRadialSelection(clientX, clientY) {
+    const el = document.elementFromPoint(clientX, clientY);
+    const item = el && el.closest ? el.closest(".radial-item") : null;
+    if (item && item.dataset && item.dataset.category) {
+      return setActiveCategory(item.dataset.category);
+    }
+    const rect = radialMenu.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = clientX - cx;
+    const dy = clientY - cy;
+    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      return setActiveCategory(dx > 0 ? "activity" : "random");
+    }
+    return setActiveCategory(dy < 0 ? "atmosphere" : "infrastructure");
+  }
+
+  async function requestBuilding(category = null) {
+    if (!engine.started) await engine.start();
+    if (engine.instances.length >= MAX_BUILDINGS) {
+      setStatus("BLOCKS FULL (MAX 10)", "#ff6b6b");
+      setTimeout(() => setStatus("DRAG TO SHAPE THE CITY"), 2000);
+      return;
+    }
+    addRandomBuilding(category);
+  }
+  async function requestBuildingByKey(key) {
+    if (!engine.started) await engine.start();
+    if (engine.instances.length >= MAX_BUILDINGS) {
+      setStatus("BLOCKS FULL (MAX 10)", "#ff6b6b");
+      setTimeout(() => setStatus("DRAG TO SHAPE THE CITY"), 2000);
+      return;
+    }
+    addBuildingByKey(key);
+  }
+
+  earBtn.addEventListener("pointerdown", (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    earBtn.setPointerCapture(e.pointerId);
+    suppressNextClick = false;
+    longPressActive = false;
+    selectedCategory = null;
+    if (hintTimer) clearTimeout(hintTimer);
+    longPressTimer = setTimeout(() => {
+      longPressActive = true;
+      suppressNextClick = true;
+      showRadialMenu();
+      updateRadialSelection(e.clientX, e.clientY);
+      window.addEventListener("pointermove", updateOnMove);
+    }, 800);
+    hintTimer = setTimeout(() => {
+      if (!longPressActive) earContainer.classList.add("longpress-hint");
+    }, 500);
+  });
+
+  function updateOnMove(e) {
+    if (!longPressActive) return;
+    updateRadialSelection(e.clientX, e.clientY);
+  }
+
+  window.addEventListener("pointerup", async () => {
+    if (longPressTimer) clearTimeout(longPressTimer);
+    if (hintTimer) clearTimeout(hintTimer);
+    earContainer.classList.remove("longpress-hint");
+    if (!longPressActive) return;
+    window.removeEventListener("pointermove", updateOnMove);
+    hideRadialMenu();
+    const chosen = selectedCategory === "random" ? null : (selectedCategory || "atmosphere");
+    longPressActive = false;
+    await requestBuilding(chosen);
+  });
+  window.addEventListener("pointercancel", () => {
+    if (longPressTimer) clearTimeout(longPressTimer);
+    if (hintTimer) clearTimeout(hintTimer);
+    earContainer.classList.remove("longpress-hint");
+    if (!longPressActive) return;
+    window.removeEventListener("pointermove", updateOnMove);
+    hideRadialMenu();
+    longPressActive = false;
+  });
+
+  earBtn.addEventListener("click", async () => {
+    if (suppressNextClick) {
+      suppressNextClick = false;
+      return;
+    }
+    if (!engine.started) await engine.start();
+    isAudioPlaying = !isAudioPlaying;
+    if (isAudioPlaying) {
+      if (Tone.Transport.state !== "started") Tone.Transport.start();
+      engine.masterVol.volume.rampTo(1, 0.2);
+      engine.setPlaying(true);
+      document.body.classList.add("is-playing");
+      earContainer.classList.add("is-playing");
+      setStatus(engine.instances.length ? "DRAG TO SHAPE THE CITY" : "LONG-PRESS EAR TO PLACE A BLOCK");
+    } else {
+      engine.masterVol.volume.rampTo(-Infinity, 0.2);
+      engine.setPlaying(false);
+      if (Tone.Transport.state === "started") Tone.Transport.pause();
+      document.body.classList.remove("is-playing");
+      earContainer.classList.remove("is-playing");
+      setStatus("PAUSED");
+    }
+  });
+
+  function addBuildingByKey(key) {
+    const reg = SOURCE_REGISTRY[key];
+    if (!reg) return;
+    
+    const building = document.createElement("div");
+    building.className = "building";
+    building.dataset.category = reg.category;
+    const width = Math.random() < 0.1
+      ? 180 + Math.floor(Math.random() * 60)
+      : 55 + Math.floor(Math.random() * 106);
+    building.style.width = `${width}px`;
+    const initialIntensity = reg.vol[0] + Math.random() * (reg.vol[1] - reg.vol[0]);
+    building.style.height = `${Math.max(15, initialIntensity * 100)}%`;
+    
+    const inst = engine.ensure(key, reg.cls, { type: key, intensity: initialIntensity, el: building });
+
+    building.classList.add("drop-in");
+    setTimeout(() => building.classList.remove("drop-in"), 800);
+
+    const label = document.createElement("div");
+    label.className = "block-label";
+    label.textContent = `+ ${reg.label} Block`;
+    building.appendChild(label);
+    setTimeout(() => label.remove(), 2200);
+    
+    const closeBtn = document.createElement("div");
+    closeBtn.className = "close-building-btn";
+    closeBtn.innerHTML = "×";
+    
+    const removeBuilding = (e) => {
+      e.stopPropagation();
+      inst.dispose();
+      engine.removeInstance(inst);
+      building.remove();
+      if (engine.instances.length === 0) {
+        earContainer.classList.remove("is-playing");
+        document.body.classList.remove("is-playing");
+        setStatus(isAudioPlaying ? "LONG-PRESS EAR TO PLACE A BLOCK" : "TAP THE EAR TO PLAY");
+        bottomHint.style.display = "block";
+      }
+    };
+    closeBtn.addEventListener("mousedown", removeBuilding);
+    closeBtn.addEventListener("touchstart", removeBuilding, {passive: false});
+    building.appendChild(closeBtn);
+
+
+    const lineFill = document.createElement("div");
+    lineFill.className = "line-fill";
+    const thickness = 2 + Math.floor(Math.random() * 3);
+    const spacing = thickness + (4 + Math.floor(Math.random() * 8));
+    const palette = {
+      atmosphere: "var(--atmo-line)",
+      activity: "var(--act-line)",
+      infrastructure: "var(--infra-line)"
+    };
+    const angle = reg.category === "activity" ? 35 : reg.category === "infrastructure" ? 90 : 0;
+    const color = palette[reg.category] || "var(--paper-cream)";
+    lineFill.style.setProperty("--line-pattern",
+      `repeating-linear-gradient(${angle}deg, ${color} 0 ${thickness}px, transparent ${thickness}px ${spacing}px)`
+    );
+    if (reg.category === "infrastructure") lineFill.classList.add("line-flow-v");
+    else if (reg.category === "activity") lineFill.classList.add("line-flow-d");
+    else lineFill.classList.add("line-flow-h");
+    lineFill.style.animationDuration = `${12 + Math.floor(Math.random() * 10)}s`;
+    const extra = Math.floor(Math.random() * 10);
+    lineFill.style.top = `${-extra}px`;
+    lineFill.style.left = `${-extra}px`;
+    lineFill.style.right = `${-extra}px`;
+    lineFill.style.bottom = `${-extra}px`;
+    building.appendChild(lineFill);
+
+    const name = document.createElement("div");
+    name.className = "track-name"; name.textContent = reg.title;
+    building.appendChild(name);
+    
+    cityscape.appendChild(building);
+    bottomHint.style.display = "none";
+    engine.updateAllPans();
+    setupBuildingDrag(building, inst);
+
+    if (isAudioPlaying) {
+      if (Tone.Transport.state !== "started") Tone.Transport.start();
+      earContainer.classList.add("is-playing");
+      document.body.classList.add("is-playing");
+      setStatus("DRAG TO SHAPE THE CITY");
+    } else {
+      setStatus("TAP THE EAR TO PLAY");
+    }
+  }
+  function addRandomBuilding(category = null) {
+    const keys = category ? CATEGORY_KEYS[category] : Object.keys(SOURCE_REGISTRY);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    addBuildingByKey(randomKey);
+  }
+
+  function setupBuildingDrag(element, instance) {
+    let isDragging = false;
+    let containerRect;
+    let lastClientX = 0;
+    const onMove = (e) => {
+      if (!isDragging) return;
+      if (e.touches && e.cancelable) e.preventDefault();
+      
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      lastClientX = clientX;
+      
+      let h = Math.max(5, Math.min(100, ((containerRect.bottom - clientY) / containerRect.height) * 100));
+      element.style.height = `${h}%`;
+      instance.setIntensity(h / 100);
+    };
+    const onEnd = () => {
+      isDragging = false; element.classList.remove("dragging");
+      const siblings = [...cityscape.querySelectorAll('.building:not(.dragging)')];
+      for (let sibling of siblings) {
+        const rect = sibling.getBoundingClientRect();
+        const siblingCenter = rect.left + rect.width / 2;
+        
+        if (element.compareDocumentPosition(sibling) & Node.DOCUMENT_POSITION_FOLLOWING) {
+          if (lastClientX > siblingCenter) {
+            sibling.after(element);
+            break;
+          }
+        } else {
+          if (lastClientX < siblingCenter) {
+            sibling.before(element);
+            break;
+          }
+        }
+      }
+      engine.updateAllPans(); 
+      window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchmove", onMove); window.removeEventListener("touchend", onEnd);
+    };
+    const onStart = (e) => {
+      if(e.target.classList.contains('close-building-btn')) return;
+      isDragging = true; element.classList.add("dragging");
+      containerRect = cityscape.getBoundingClientRect();
+      window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", onEnd);
+      window.addEventListener("touchmove", onMove, {passive: false}); window.addEventListener("touchend", onEnd);
+    };
+    element.addEventListener("mousedown", onStart);
+    element.addEventListener("touchstart", onStart, {passive: false});
+  }
+  </script>
+</body>
+</html>
