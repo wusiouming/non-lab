@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>SOUND BRICKS - city asmr</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Spectral:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -40,11 +40,15 @@
       padding: 0;
       height: 100vh;
       width: 100vw;
-      overflow: visible;
+      min-height: 100svh;
+      min-height: 100dvh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       position: relative;
-      touch-action: none;
+      touch-action: manipulation;
+      overscroll-behavior: none;
+      -webkit-text-size-adjust: 100%;
     }
     .sound-waves {
       position: absolute;
@@ -159,6 +163,7 @@
       color: var(--paper-cream);
       transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     .ear-btn:hover {
@@ -234,7 +239,7 @@
     /* 背景星星 */
     .stars-container {
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 60vh;
+      top: 0; left: 0; width: 100%; height: 68vh;
       z-index: 1;
       pointer-events: none;
     }
@@ -297,11 +302,12 @@
       padding-bottom: 20px;
       user-select: none;
       -webkit-user-select: none;
+      touch-action: none;
       overflow: visible;
     }
 
 
-    .block-label {
+    .brick-label {
       position: absolute;
       top: -10px;
       left: 50%;
@@ -499,6 +505,120 @@
     width: 94vw;
     max-height: 86vh;
     padding: 22px;
+    border-radius: 18px;
+  }
+}
+@media (max-width: 720px) {
+  body {
+    background-size: 18px 18px, 100% 100%;
+    background-attachment: fixed;
+  }
+
+  .title {
+    top: calc(env(safe-area-inset-top) + 10px);
+    width: calc(100% - 24px);
+    left: 12px;
+    right: 12px;
+    font-size: 1.35rem;
+    letter-spacing: 2px;
+    padding: 10px 14px 8px;
+    border-radius: 18px;
+    background: rgba(17,24,32,0.42);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(241,235,217,0.1);
+  }
+
+  .title-sub {
+    font-size: 0.6rem;
+    letter-spacing: 2.5px;
+  }
+
+  .status {
+    top: calc(env(safe-area-inset-top) + 70px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 48px);
+    font-size: 0.66rem;
+    letter-spacing: 1.2px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(17,24,32,0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(241,235,217,0.12);
+  }
+
+  .sound-waves {
+    top: 13%;
+    width: 96vw;
+    height: 84px;
+    opacity: 0.42;
+  }
+
+  .ear-container {
+    margin-bottom: 18vh;
+  }
+
+  .ear-btn {
+    width: 132px;
+    height: 132px;
+  }
+
+  .bottom-hint {
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(17,24,32,0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .cityscape {
+    height: 50vh;
+    gap: 4px;
+    padding: 0 6px calc(env(safe-area-inset-bottom) + 4px);
+  }
+
+  .building {
+    min-width: 28px;
+    padding-bottom: 16px;
+  }
+
+  .brick-label {
+    font-size: 0.62rem;
+    padding: 4px 7px;
+  }
+
+  .track-name {
+    font-size: 0.68rem;
+    padding: 4px 2px;
+  }
+
+  .close-building-btn {
+    opacity: 0.95;
+    width: 30px;
+    height: 30px;
+  }
+
+  .info-modal,
+  .upload-modal {
+    padding: 16px;
+  }
+
+  .upload-content {
+    width: min(520px, 94vw);
+    border-radius: 18px;
+    padding: 22px;
+  }
+}
+@media (hover: none) and (pointer: coarse) {
+  .title:hover,
+  .ear-btn:hover {
+    transform: none;
+    filter: none;
   }
 }
 .upload-modal {
@@ -574,7 +694,7 @@
 <body>
 
   <div class="title" id="titleBtn"><span class="title-main">SOUND BRICKS</span><span class="title-sub">city asmr</span></div>
-  <div class="status" id="statusText">TAP THE EAR TO PLAY</div>
+  <div class="status" id="statusText">TAP THE EAR TO ADD A BRICK</div>
 
   <div class="ear-container" id="earContainer">
     <svg viewBox="0 0 100 100" class="ear-btn" id="generateBtn" xmlns="http://www.w3.org/2000/svg">
@@ -592,7 +712,7 @@
 
   <div class="stars-container" id="starsContainer"></div>
   <svg class="sound-waves" id="soundWaves" viewBox="0 0 800 140" preserveAspectRatio="none" aria-hidden="true"></svg>
-  <div class="bottom-hint" id="bottomHint">Long-press the ear to place a block</div>
+  <div class="bottom-hint" id="bottomHint">Tap the ear to place a brick</div>
 
   <div class="cityscape" id="cityscape"></div>
 
@@ -615,13 +735,13 @@ You are composing a city through listening.
 
 <h3>How to Play / 操作方式</h3>
 <ul>
-  <li><strong>Tap the Ear</strong> — 生成一棟聲音建築（最多 10）。</li>
+  <li><strong>Tap the Ear</strong> — 每次點擊都會生成一棟隨機聲音建築（最多 10）。</li>
   <li><strong>Spatial Sound</strong> — 左右位置影響左右耳的聲像。</li>
   <li><strong>Drag Buildings</strong><br>
     ↕ 高度 = 音量<br>
     ↔ 位置 = 立體聲空間
   </li>
-  <li><strong>Long Press Ear</strong> — 長按 0.8 秒可切換積木類別：Atmosphere / Activity / Infrastructure。</li>
+  <li><strong>Upload</strong> — 也可以上傳自己的聲音，讓它成為城市的一部分。</li>
   <li><strong>Remove</strong> — 點 × 拆除建築。</li>
 </ul>
 
@@ -701,6 +821,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   class SoundscapeEngine {
     constructor() {
       this.started = false;
+      this.startingPromise = null;
       this.masterVol = new Tone.Volume(-Infinity).toDestination();
       this.limiter = new Tone.Limiter(-1).connect(this.masterVol);
       this.compressor = new Tone.Compressor({ threshold: -24, ratio: 3.5, attack: 0.01, release: 0.15 }).connect(this.limiter);
@@ -709,9 +830,18 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       this.instances = [];
     }
     async start() {
-      await Tone.start();
-      await this.reverb.generate();
-      this.started = true;
+      if (this.started) return;
+      if (this.startingPromise) return this.startingPromise;
+      this.startingPromise = (async () => {
+        await Tone.start();
+        await this.reverb.generate();
+        this.started = true;
+      })();
+      try {
+        await this.startingPromise;
+      } finally {
+        this.startingPromise = null;
+      }
     }
     removeInstance(inst) {
       const idx = this.instances.indexOf(inst);
@@ -1290,14 +1420,16 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
 
   // 初始化星空
   const starsContainer = document.getElementById("starsContainer");
-  for (let i = 0; i < 60; i++) {
+  const starCount = window.matchMedia("(max-width: 720px)").matches ? 90 : 120;
+  for (let i = 0; i < starCount; i++) {
     const star = document.createElement("div");
     star.className = "star";
-    const size = Math.random() * 2 + 1;
+    const size = 0.8 + Math.random() * 2.4;
     star.style.width = size + "px"; star.style.height = size + "px";
     star.style.left = Math.random() * 100 + "%"; star.style.top = Math.random() * 100 + "%";
-    star.style.animationDuration = (Math.random() * 3 + 2) + "s";
-    star.style.animationDelay = (Math.random() * 5) + "s";
+    star.style.animationDuration = (Math.random() * 3.5 + 1.8) + "s";
+    star.style.animationDelay = (Math.random() * 6) + "s";
+    star.style.opacity = (0.35 + Math.random() * 0.55).toFixed(2);
     starsContainer.appendChild(star);
   }
   updateWaveform();
@@ -1334,7 +1466,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   function registerCustomSample(file) {
     if (customCount >= MAX_CUSTOM) {
       setStatus("CUSTOM LIMIT REACHED", "#ff6b6b");
-      setTimeout(() => setStatus(isAudioPlaying ? "LONG-PRESS EAR TO PLACE A BLOCK" : "TAP THE EAR TO PLAY"), 2000);
+      setTimeout(() => setStatus("TAP THE EAR TO ADD A BRICK"), 2000);
       return null;
     }
     const customSampleUrl = URL.createObjectURL(file);
@@ -1371,17 +1503,6 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   };
   catEl.addEventListener("pointerdown", openUploadModal);
   catEl.addEventListener("click", openUploadModal);
-
-  radialItems.forEach((item) => {
-    item.addEventListener("click", (e) => {
-      e.stopPropagation();
-      selectedCategory = item.dataset.category;
-      hideRadialMenu();
-      longPressActive = false;
-      const chosen = selectedCategory === "random" ? null : (selectedCategory || "atmosphere");
-      requestBuilding(chosen);
-    });
-  });
 
   uploadInput.addEventListener("change", () => {
     uploadConfirmBtn.disabled = !uploadInput.files || uploadInput.files.length === 0;
@@ -1488,130 +1609,39 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   // 啟動後 15 秒開始嘗試叫喚小貓
   setTimeout(startCatSequence, 30000);
 
-  let longPressTimer = null;
-  let longPressActive = false;
-  let suppressNextClick = false;
-  let selectedCategory = null;
-  let hintTimer = null;
   let isAudioPlaying = false;
 
-  function setActiveCategory(cat) {
-    selectedCategory = cat;
-    radialItems.forEach((item) => {
-      item.classList.toggle("active", item.dataset.category === cat);
-    });
-  }
-  function showRadialMenu() {
-    radialMenu.classList.add("show");
-  }
-  function hideRadialMenu() {
-    radialMenu.classList.remove("show");
-    radialItems.forEach((item) => item.classList.remove("active"));
-  }
-  function updateRadialSelection(clientX, clientY) {
-    const el = document.elementFromPoint(clientX, clientY);
-    const item = el && el.closest ? el.closest(".radial-item") : null;
-    if (item && item.dataset && item.dataset.category) {
-      return setActiveCategory(item.dataset.category);
-    }
-    const rect = radialMenu.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = clientX - cx;
-    const dy = clientY - cy;
-    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      return setActiveCategory(dx > 0 ? "activity" : "random");
-    }
-    return setActiveCategory(dy < 0 ? "atmosphere" : "infrastructure");
+  async function ensurePlayback() {
+    if (!engine.started) await engine.start();
+    if (Tone.Transport.state !== "started") Tone.Transport.start();
+    engine.masterVol.volume.rampTo(1, 0.2);
+    engine.setPlaying(true);
+    document.body.classList.add("is-playing");
+    earContainer.classList.add("is-playing");
+    isAudioPlaying = true;
   }
 
   async function requestBuilding(category = null) {
-    if (!engine.started) await engine.start();
+    await ensurePlayback();
     if (engine.instances.length >= MAX_BUILDINGS) {
-      setStatus("BLOCKS FULL (MAX 10)", "#ff6b6b");
-      setTimeout(() => setStatus("DRAG TO SHAPE THE CITY"), 2000);
+      setStatus("BRICKS FULL (MAX 10)", "#ff6b6b");
+      setTimeout(() => setStatus("TAP THE EAR TO ADD A BRICK"), 2000);
       return;
     }
     addRandomBuilding(category);
   }
   async function requestBuildingByKey(key) {
-    if (!engine.started) await engine.start();
+    await ensurePlayback();
     if (engine.instances.length >= MAX_BUILDINGS) {
-      setStatus("BLOCKS FULL (MAX 10)", "#ff6b6b");
-      setTimeout(() => setStatus("DRAG TO SHAPE THE CITY"), 2000);
+      setStatus("BRICKS FULL (MAX 10)", "#ff6b6b");
+      setTimeout(() => setStatus("TAP THE EAR TO ADD A BRICK"), 2000);
       return;
     }
     addBuildingByKey(key);
   }
 
-  earBtn.addEventListener("pointerdown", (e) => {
-    if (e.button !== undefined && e.button !== 0) return;
-    earBtn.setPointerCapture(e.pointerId);
-    suppressNextClick = false;
-    longPressActive = false;
-    selectedCategory = null;
-    if (hintTimer) clearTimeout(hintTimer);
-    longPressTimer = setTimeout(() => {
-      longPressActive = true;
-      suppressNextClick = true;
-      showRadialMenu();
-      updateRadialSelection(e.clientX, e.clientY);
-      window.addEventListener("pointermove", updateOnMove);
-    }, 800);
-    hintTimer = setTimeout(() => {
-      if (!longPressActive) earContainer.classList.add("longpress-hint");
-    }, 500);
-  });
-
-  function updateOnMove(e) {
-    if (!longPressActive) return;
-    updateRadialSelection(e.clientX, e.clientY);
-  }
-
-  window.addEventListener("pointerup", async () => {
-    if (longPressTimer) clearTimeout(longPressTimer);
-    if (hintTimer) clearTimeout(hintTimer);
-    earContainer.classList.remove("longpress-hint");
-    if (!longPressActive) return;
-    window.removeEventListener("pointermove", updateOnMove);
-    hideRadialMenu();
-    const chosen = selectedCategory === "random" ? null : (selectedCategory || "atmosphere");
-    longPressActive = false;
-    await requestBuilding(chosen);
-  });
-  window.addEventListener("pointercancel", () => {
-    if (longPressTimer) clearTimeout(longPressTimer);
-    if (hintTimer) clearTimeout(hintTimer);
-    earContainer.classList.remove("longpress-hint");
-    if (!longPressActive) return;
-    window.removeEventListener("pointermove", updateOnMove);
-    hideRadialMenu();
-    longPressActive = false;
-  });
-
   earBtn.addEventListener("click", async () => {
-    if (suppressNextClick) {
-      suppressNextClick = false;
-      return;
-    }
-    if (!engine.started) await engine.start();
-    isAudioPlaying = !isAudioPlaying;
-    if (isAudioPlaying) {
-      if (Tone.Transport.state !== "started") Tone.Transport.start();
-      engine.masterVol.volume.rampTo(1, 0.2);
-      engine.setPlaying(true);
-      document.body.classList.add("is-playing");
-      earContainer.classList.add("is-playing");
-      setStatus(engine.instances.length ? "DRAG TO SHAPE THE CITY" : "LONG-PRESS EAR TO PLACE A BLOCK");
-    } else {
-      engine.masterVol.volume.rampTo(-Infinity, 0.2);
-      engine.setPlaying(false);
-      if (Tone.Transport.state === "started") Tone.Transport.pause();
-      document.body.classList.remove("is-playing");
-      earContainer.classList.remove("is-playing");
-      setStatus("PAUSED");
-    }
+    await requestBuilding();
   });
 
   function addBuildingByKey(key) {
@@ -1621,9 +1651,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     const building = document.createElement("div");
     building.className = "building";
     building.dataset.category = reg.category;
+    const mobileLayout = window.matchMedia("(max-width: 720px)").matches;
     const width = Math.random() < 0.1
-      ? 180 + Math.floor(Math.random() * 60)
-      : 55 + Math.floor(Math.random() * 106);
+      ? (mobileLayout ? 120 + Math.floor(Math.random() * 30) : 180 + Math.floor(Math.random() * 60))
+      : (mobileLayout ? 42 + Math.floor(Math.random() * 78) : 55 + Math.floor(Math.random() * 106));
     building.style.width = `${width}px`;
     const initialIntensity = reg.vol[0] + Math.random() * (reg.vol[1] - reg.vol[0]);
     building.style.height = `${Math.max(15, initialIntensity * 100)}%`;
@@ -1634,8 +1665,8 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     setTimeout(() => building.classList.remove("drop-in"), 800);
 
     const label = document.createElement("div");
-    label.className = "block-label";
-    label.textContent = `+ ${reg.label} Block`;
+    label.className = "brick-label";
+    label.textContent = `+ ${reg.label} Brick`;
     building.appendChild(label);
     setTimeout(() => label.remove(), 2200);
     
@@ -1644,19 +1675,21 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     closeBtn.innerHTML = "×";
     
     const removeBuilding = (e) => {
+      if (e && e.cancelable) e.preventDefault();
       e.stopPropagation();
       inst.dispose();
       engine.removeInstance(inst);
       building.remove();
       if (engine.instances.length === 0) {
-        earContainer.classList.remove("is-playing");
-        document.body.classList.remove("is-playing");
-        setStatus(isAudioPlaying ? "LONG-PRESS EAR TO PLACE A BLOCK" : "TAP THE EAR TO PLAY");
+        setStatus("TAP THE EAR TO ADD A BRICK");
         bottomHint.style.display = "block";
       }
     };
-    closeBtn.addEventListener("mousedown", removeBuilding);
-    closeBtn.addEventListener("touchstart", removeBuilding, {passive: false});
+    closeBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    closeBtn.addEventListener("click", removeBuilding);
     building.appendChild(closeBtn);
 
 
@@ -1694,14 +1727,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     engine.updateAllPans();
     setupBuildingDrag(building, inst);
 
-    if (isAudioPlaying) {
-      if (Tone.Transport.state !== "started") Tone.Transport.start();
-      earContainer.classList.add("is-playing");
-      document.body.classList.add("is-playing");
-      setStatus("DRAG TO SHAPE THE CITY");
-    } else {
-      setStatus("TAP THE EAR TO PLAY");
-    }
+    setStatus("DRAG TO SHAPE THE CITY");
   }
   function addRandomBuilding(category = null) {
     const keys = category ? CATEGORY_KEYS[category] : Object.keys(SOURCE_REGISTRY);
@@ -1715,10 +1741,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     let lastClientX = 0;
     const onMove = (e) => {
       if (!isDragging) return;
-      if (e.touches && e.cancelable) e.preventDefault();
-      
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      if (e.cancelable) e.preventDefault();
+
+      const clientY = e.clientY;
+      const clientX = e.clientX;
       lastClientX = clientX;
       
       let h = Math.max(5, Math.min(100, ((containerRect.bottom - clientY) / containerRect.height) * 100));
@@ -1726,7 +1752,9 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       instance.setIntensity(h / 100);
     };
     const onEnd = () => {
-      isDragging = false; element.classList.remove("dragging");
+      if (!isDragging) return;
+      isDragging = false;
+      element.classList.remove("dragging");
       const siblings = [...cityscape.querySelectorAll('.building:not(.dragging)')];
       for (let sibling of siblings) {
         const rect = sibling.getBoundingClientRect();
@@ -1745,18 +1773,24 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
         }
       }
       engine.updateAllPans(); 
-      window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onEnd);
-      window.removeEventListener("touchmove", onMove); window.removeEventListener("touchend", onEnd);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onEnd);
+      window.removeEventListener("pointercancel", onEnd);
     };
     const onStart = (e) => {
-      if(e.target.classList.contains('close-building-btn')) return;
+      if (e.target.closest && e.target.closest(".close-building-btn")) return;
+      if (e.button !== undefined && e.button !== 0) return;
+      if (e.cancelable) e.preventDefault();
       isDragging = true; element.classList.add("dragging");
       containerRect = cityscape.getBoundingClientRect();
-      window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", onEnd);
-      window.addEventListener("touchmove", onMove, {passive: false}); window.addEventListener("touchend", onEnd);
+      if (element.setPointerCapture && e.pointerId !== undefined) {
+        try { element.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onEnd);
+      window.addEventListener("pointercancel", onEnd);
     };
-    element.addEventListener("mousedown", onStart);
-    element.addEventListener("touchstart", onStart, {passive: false});
+    element.addEventListener("pointerdown", onStart);
   }
   </script>
 </body>
