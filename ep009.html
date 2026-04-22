@@ -1025,16 +1025,21 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     }
     dispose(){ super.dispose(); this.player.dispose(); }
   }
-    class gym01 extends BaseSource {
+  class gym01 extends BaseSource {
     constructor(opts){
       super(opts);
       this.player = new Tone.Player({ url: "gym_01.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
+      this.ready = this.player.load();
     }
-    setPlaying(on) {
-      if (on) this.player.start();
-      else this.player.stop();
+    async setPlaying(on) {
+      if (on) {
+        await this.ready;
+        this.player.start();
+      } else {
+        this.player.stop();
+      }
     }
     dispose(){ super.dispose(); this.player.dispose(); }
   }
@@ -1044,10 +1049,15 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       this.player = new Tone.Player({ url: "street_01.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
+      this.ready = this.player.load();
     }
-    setPlaying(on) {
-      if (on) this.player.start();
-      else this.player.stop();
+    async setPlaying(on) {
+      if (on) {
+        await this.ready;
+        this.player.start();
+      } else {
+        this.player.stop();
+      }
     }
     dispose(){ super.dispose(); this.player.dispose(); }
   }
