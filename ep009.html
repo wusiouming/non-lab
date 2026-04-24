@@ -662,6 +662,40 @@
   margin: 14px 0 10px;
   color: var(--paper-cream);
 }
+.inspiration-panel {
+  display: none;
+}
+.inspiration-panel.show {
+  display: block;
+}
+.inspiration-card {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(241,235,217,0.14);
+  background: rgba(17,24,32,0.45);
+  box-shadow: inset 0 0 0 1px rgba(241,235,217,0.04);
+}
+.inspiration-label {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 0.72rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.inspiration-text {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.65;
+  letter-spacing: 0.2px;
+  color: var(--paper-cream);
+}
+.inspiration-note {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  color: rgba(244,237,220,0.7);
+}
 .upload-btn {
   display: inline-block;
   padding: 8px 14px;
@@ -797,10 +831,20 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   <div class="upload-modal" id="uploadModal">
     <div class="upload-content">
       <button class="close-btn" id="uploadCloseBtn">×</button>
-      <h3>Upload Bricks</h3>
-      <p>Upload your own sound file. It will be blended into the city and the cat will disappear after upload.</p>
-      <input type="file" id="uploadInput" accept="audio/*">
-      <button class="upload-btn" id="uploadConfirmBtn" disabled>Use This Sound</button>
+      <div id="uploadPanel">
+        <h3>Upload Bricks</h3>
+        <p>Upload your own sound file. It will be blended into the city and the cat will disappear after upload.</p>
+        <input type="file" id="uploadInput" accept="audio/*">
+        <button class="upload-btn" id="uploadConfirmBtn" disabled>Use This Sound</button>
+      </div>
+      <div class="inspiration-panel" id="inspirationPanel">
+        <h3>Sound Inspiration</h3>
+        <div class="inspiration-card">
+          <span class="inspiration-label">Task Card</span>
+          <p class="inspiration-text" id="inspirationText"></p>
+          <p class="inspiration-note">Use this sentence as a starting point for your next brick.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -811,8 +855,31 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   const closeBtn = document.getElementById("closeBtn");
   const uploadModal = document.getElementById("uploadModal");
   const uploadCloseBtn = document.getElementById("uploadCloseBtn");
+  const uploadPanel = document.getElementById("uploadPanel");
+  const inspirationPanel = document.getElementById("inspirationPanel");
+  const inspirationText = document.getElementById("inspirationText");
   const uploadInput = document.getElementById("uploadInput");
   const uploadConfirmBtn = document.getElementById("uploadConfirmBtn");
+  const soundInspirations = [
+    "蓋一座讓你感到放鬆的空間",
+    "做一個可以待很久的聲音角落",
+    "做一個讓你專心的地方",
+    "做一個讓你安心的環境",
+    "做一個會讓你想閉上眼睛的聲音",
+    "做一個深夜的城市",
+    "做一個剛下雨的地方",
+    "做一個清晨還沒醒的空間",
+    "做一個遠方有人生活的地方",
+    "做一個你想住進去的聲音城市",
+    "蓋一座有點吵但不討厭的城市",
+    "做一個奇怪但好聽的空間",
+    "試著讓這個城市變得很熱鬧",
+    "做一個聲音很多但不混亂的地方",
+    "做一個會呼吸的空間",
+    "做一個有距離感的地方",
+    "做一個讓時間變慢的聲音"
+  ];
+  let currentModalMode = "upload";
 
   titleBtn.addEventListener("click", () => infoModal.classList.add("show"));
   closeBtn.addEventListener("click", () => infoModal.classList.remove("show"));
@@ -821,6 +888,9 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     uploadModal.classList.remove("show");
     uploadInput.value = "";
     uploadConfirmBtn.disabled = true;
+    currentModalMode = "upload";
+    uploadPanel.style.display = "block";
+    inspirationPanel.classList.remove("show");
   };
   uploadCloseBtn.addEventListener("click", closeUploadModal);
   uploadModal.addEventListener("click", (e) => { if (e.target === uploadModal) closeUploadModal(); });
@@ -1558,9 +1628,14 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   const openUploadModal = (e) => {
     if (isCatDisabled()) return;
     e.stopPropagation();
+    currentModalMode = Math.random() < 0.5 ? "upload" : "inspiration";
+    uploadPanel.style.display = currentModalMode === "upload" ? "block" : "none";
+    inspirationPanel.classList.toggle("show", currentModalMode === "inspiration");
+    if (currentModalMode === "inspiration") {
+      inspirationText.textContent = soundInspirations[Math.floor(Math.random() * soundInspirations.length)];
+    }
     uploadModal.classList.add("show");
   };
-  catEl.addEventListener("pointerdown", openUploadModal);
   catEl.addEventListener("click", openUploadModal);
 
   uploadInput.addEventListener("change", () => {
