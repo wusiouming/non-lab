@@ -614,6 +614,17 @@
     padding: 22px;
   }
 }
+@media (pointer: coarse) {
+  .building {
+    min-width: 42px;
+  }
+
+  .close-building-btn {
+    width: 32px;
+    height: 32px;
+    opacity: 1;
+  }
+}
 @media (hover: none) and (pointer: coarse) {
   .title:hover,
   .ear-btn:hover {
@@ -1043,10 +1054,46 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     }
     dispose(){ super.dispose(); this.player.dispose(); }
   }
+  class kitchen01 extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.player = new Tone.Player({ url: "kitchen_01.mp3", loop: true, autostart: false });
+      this.player.connect(this.channel);
+      this.player.playbackRate = 0.96 + Math.random() * 0.08;
+      this.ready = this.player.load();
+    }
+    async setPlaying(on) {
+      if (on) {
+        await this.ready;
+        this.player.start();
+      } else {
+        this.player.stop();
+      }
+    }
+    dispose(){ super.dispose(); this.player.dispose(); }
+  }
     class street01 extends BaseSource {
     constructor(opts){
       super(opts);
       this.player = new Tone.Player({ url: "street_01.mp3", loop: true, autostart: false });
+      this.player.connect(this.channel);
+      this.player.playbackRate = 0.96 + Math.random() * 0.08;
+      this.ready = this.player.load();
+    }
+    async setPlaying(on) {
+      if (on) {
+        await this.ready;
+        this.player.start();
+      } else {
+        this.player.stop();
+      }
+    }
+    dispose(){ super.dispose(); this.player.dispose(); }
+  }
+  class farm01 extends BaseSource {
+    constructor(opts){
+      super(opts);
+      this.player = new Tone.Player({ url: "farm_01.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
       this.ready = this.player.load();
@@ -1343,7 +1390,9 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     bicycle: { cls: Bicycle, title: "BICYCLE", vol: [0.4, 0.7], category: "infrastructure", label: "Wheel Ring" },
     raintin: { cls: RainOnTin, title: "TIN RAIN", vol: [0.45, 0.9], category: "atmosphere", label: "Tin Rain" },
     street01: { cls: street01, title: "street01", vol: [0.45, 0.9], category: "atmosphere", label: "street01" },
-    gym01: { cls: gym01, title: "gym01", vol: [0.45, 0.9], category: "infrastructure", label: "gym01" }
+    gym01: { cls: gym01, title: "gym01", vol: [0.45, 0.9], category: "infrastructure", label: "gym01" },
+    kitchen01: { cls: kitchen01, title: "KITCHEN", vol: [0.45, 0.9], category: "activity", label: "Kitchen Room" },
+    farm01: { cls: farm01, title: "FARM", vol: [0.45, 0.9], category: "atmosphere", label: "Farm Field" }
   };
   let CATEGORY_KEYS = {};
   function rebuildCategoryKeys() {
@@ -1662,9 +1711,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     building.className = "building";
     building.dataset.category = reg.category;
     const mobileLayout = window.matchMedia("(max-width: 720px)").matches;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const width = Math.random() < 0.1
-      ? (mobileLayout ? 120 + Math.floor(Math.random() * 30) : 180 + Math.floor(Math.random() * 60))
-      : (mobileLayout ? 42 + Math.floor(Math.random() * 78) : 55 + Math.floor(Math.random() * 106));
+      ? (coarsePointer ? 132 + Math.floor(Math.random() * 42) : mobileLayout ? 120 + Math.floor(Math.random() * 30) : 180 + Math.floor(Math.random() * 60))
+      : (coarsePointer ? 58 + Math.floor(Math.random() * 52) : mobileLayout ? 42 + Math.floor(Math.random() * 78) : 55 + Math.floor(Math.random() * 106));
     building.style.width = `${width}px`;
     const initialIntensity = reg.vol[0] + Math.random() * (reg.vol[1] - reg.vol[0]);
     building.style.height = `${Math.max(15, initialIntensity * 100)}%`;
