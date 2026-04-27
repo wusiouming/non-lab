@@ -383,6 +383,45 @@
       border: 1px solid rgba(241, 235, 217, 0.3);
     }
 
+    .drag-handle {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      right: 42px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(241,235,217,0.12);
+      background: rgba(17,24,32,0.42);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      z-index: 11;
+      pointer-events: auto;
+      user-select: none;
+      -webkit-user-select: none;
+      color: var(--paper-cream);
+      text-transform: uppercase;
+      font-size: 0.55rem;
+      letter-spacing: 1.6px;
+    }
+    .drag-handle .grip {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 14px;
+      flex: 0 0 auto;
+    }
+    .drag-handle .grip span {
+      display: block;
+      height: 2px;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(241,235,217,0.8);
+    }
+
     .building:hover .close-building-btn {
       opacity: 1;
     }
@@ -616,13 +655,24 @@
 }
 @media (pointer: coarse) {
   .building {
-    min-width: 42px;
+    min-width: 48px;
+  }
+
+  .building::before {
+    content: "";
+    position: absolute;
+    inset: -18px -12px -8px;
+    border-radius: 10px;
   }
 
   .close-building-btn {
     width: 32px;
     height: 32px;
     opacity: 1;
+  }
+
+  .drag-handle {
+    display: flex;
   }
 }
 @media (hover: none) and (pointer: coarse) {
@@ -1804,6 +1854,12 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     label.textContent = `+ ${reg.label} Brick`;
     building.appendChild(label);
     setTimeout(() => label.remove(), 2200);
+
+    const dragHandle = document.createElement("div");
+    dragHandle.className = "drag-handle";
+    dragHandle.setAttribute("aria-hidden", "true");
+    dragHandle.innerHTML = '<div class="grip"><span></span><span></span><span></span></div><span>Drag</span>';
+    building.appendChild(dragHandle);
     
     const closeBtn = document.createElement("div");
     closeBtn.className = "close-building-btn";
