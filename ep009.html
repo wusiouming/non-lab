@@ -362,77 +362,10 @@
       100% { transform: translateY(0); opacity: 1; }
     }
 
-    .close-building-btn {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      width: 26px;
-      height: 26px;
-      background-color: rgba(17, 24, 32, 0.6);
-      color: var(--paper-cream);
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 16px;
-      line-height: 1;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s, background-color 0.2s;
-      z-index: 20;
-      border: 1px solid rgba(241, 235, 217, 0.3);
-    }
-
-    .drag-handle {
-      position: absolute;
-      top: 6px;
-      left: 6px;
-      right: 42px;
-      height: 26px;
-      border-radius: 999px;
-      border: 1px solid rgba(241,235,217,0.12);
-      background: rgba(17,24,32,0.42);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 0 10px;
-      z-index: 11;
-      pointer-events: auto;
-      user-select: none;
-      -webkit-user-select: none;
-      color: var(--paper-cream);
-      text-transform: uppercase;
-      font-size: 0.55rem;
-      letter-spacing: 1.6px;
-    }
-    .drag-handle .grip {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      width: 14px;
-      flex: 0 0 auto;
-    }
-    .drag-handle .grip span {
-      display: block;
-      height: 2px;
-      width: 100%;
-      border-radius: 999px;
-      background: rgba(241,235,217,0.8);
-    }
-
-    .building:hover .close-building-btn {
-      opacity: 1;
-    }
-    .building:hover .close-building-btn::after {
-      content: "";
-      position: absolute;
-      inset: -6px;
-    }
-
-    .close-building-btn:hover {
-      background-color: rgba(220, 50, 50, 0.8);
+    .building.selected {
+      outline: 2px solid rgba(241,235,217,0.55);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 1px rgba(17,24,32,0.35), 0 0 24px rgba(241,235,217,0.08);
     }
 
     .line-fill {
@@ -636,12 +569,6 @@
     padding: 4px 2px;
   }
 
-  .close-building-btn {
-    opacity: 0.95;
-    width: 30px;
-    height: 30px;
-  }
-
   .info-modal,
   .upload-modal {
     padding: 16px;
@@ -652,27 +579,13 @@
     border-radius: 18px;
     padding: 22px;
   }
+  .mobile-controls {
+    width: min(320px, calc(100vw - 16px));
+  }
 }
 @media (pointer: coarse) {
   .building {
     min-width: 48px;
-  }
-
-  .building::before {
-    content: "";
-    position: absolute;
-    inset: -18px -12px -8px;
-    border-radius: 10px;
-  }
-
-  .close-building-btn {
-    width: 32px;
-    height: 32px;
-    opacity: 1;
-  }
-
-  .drag-handle {
-    display: flex;
   }
 }
 @media (hover: none) and (pointer: coarse) {
@@ -746,6 +659,89 @@
   font-size: 0.82rem;
   color: rgba(244,237,220,0.7);
 }
+.mobile-controls {
+  position: fixed;
+  left: 50%;
+  top: calc(env(safe-area-inset-top) + 10px);
+  transform: translateX(-50%);
+  bottom: auto;
+  width: min(300px, calc(100vw - 16px));
+  background: rgba(17,24,32,0.28);
+  border: 1px solid rgba(241,235,217,0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(241,235,217,0.03);
+  padding: 8px 9px 10px;
+  z-index: 9998;
+  display: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.mobile-controls.show {
+  display: block;
+}
+.mobile-controls-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--paper-cream);
+  font-size: 0.64rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.mobile-controls-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mobile-controls-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(241,235,217,0.14);
+  background: rgba(241,235,217,0.06);
+  color: var(--paper-cream);
+  font-size: 0.92rem;
+  line-height: 1;
+}
+.mobile-dpad {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.mobile-dpad button {
+  appearance: none;
+  border: 1px solid rgba(241,235,217,0.14);
+  background: rgba(241,235,217,0.06);
+  color: var(--paper-cream);
+  border-radius: 12px;
+  min-height: 44px;
+  font-size: 1.05rem;
+  font-family: inherit;
+  touch-action: manipulation;
+}
+.mobile-dpad button:active {
+  transform: translateY(1px);
+  background: rgba(241,235,217,0.12);
+}
+.mobile-dpad .empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+.mobile-up { grid-column: 2; grid-row: 1; }
+.mobile-left { grid-column: 1; grid-row: 2; }
+.mobile-down { grid-column: 2; grid-row: 2; }
+.mobile-right { grid-column: 3; grid-row: 2; }
+.mobile-info {
+  margin-top: 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.8px;
+  line-height: 1.4;
+  color: rgba(244,237,220,0.64);
+  text-align: center;
+}
 .upload-btn {
   display: inline-block;
   padding: 8px 14px;
@@ -811,6 +807,25 @@
 
   <div class="cityscape" id="cityscape"></div>
 
+  <div class="mobile-controls" id="mobileControls" aria-hidden="true">
+    <div class="mobile-controls-title">
+      <div class="mobile-controls-name" id="mobileControlsName">Select a brick</div>
+      <button class="mobile-controls-close" id="mobileControlsClose" type="button">×</button>
+    </div>
+    <div class="mobile-dpad" role="group" aria-label="Brick controls">
+      <button class="mobile-up empty" type="button" tabindex="-1" aria-hidden="true"></button>
+      <button class="mobile-up" id="mobileUpBtn" type="button" aria-label="Move up">▲</button>
+      <button class="mobile-right" id="mobileRightBtn" type="button" aria-label="Move right">▶</button>
+      <button class="mobile-left" id="mobileLeftBtn" type="button" aria-label="Move left">◀</button>
+      <button class="mobile-down" id="mobileDownBtn" type="button" aria-label="Move down">▼</button>
+      <button class="mobile-dpad empty" type="button" tabindex="-1" aria-hidden="true"></button>
+      <button class="mobile-dpad empty" type="button" tabindex="-1" aria-hidden="true"></button>
+      <button class="mobile-dpad empty" type="button" tabindex="-1" aria-hidden="true"></button>
+      <button class="mobile-dpad empty" type="button" tabindex="-1" aria-hidden="true"></button>
+    </div>
+    <div class="mobile-info">Up/down change height, left/right change position. Drag is for desktop.</div>
+  </div>
+
   <div class="info-modal" id="infoModal">
     <div class="info-content">
       <button class="close-btn" id="closeBtn">×</button>
@@ -836,8 +851,9 @@ You are composing a city through listening.
     ↕ 高度 = 音量<br>
     ↔ 位置 = 立體聲空間
   </li>
+  <li><strong>Mobile</strong> — 點建築後，用上下左右按鈕調整。</li>
   <li><strong>Upload</strong> — 也可以上傳自己的聲音，讓它成為城市的一部分。</li>
-  <li><strong>Remove</strong> — 點 × 拆除建築。</li>
+  <li><strong>Remove</strong> — 把建築拉到最低就會自動拆除。</li>
 </ul>
 
 <hr>
@@ -910,6 +926,14 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   const inspirationText = document.getElementById("inspirationText");
   const uploadInput = document.getElementById("uploadInput");
   const uploadConfirmBtn = document.getElementById("uploadConfirmBtn");
+  const mobileControls = document.getElementById("mobileControls");
+  const mobileControlsName = document.getElementById("mobileControlsName");
+  const mobileControlsClose = document.getElementById("mobileControlsClose");
+  const mobileUpBtn = document.getElementById("mobileUpBtn");
+  const mobileDownBtn = document.getElementById("mobileDownBtn");
+  const mobileLeftBtn = document.getElementById("mobileLeftBtn");
+  const mobileRightBtn = document.getElementById("mobileRightBtn");
+  const MOBILE_BUILDING_LIMIT = 5;
   const soundInspirations = [
     "蓋一座讓你感到放鬆的空間",
     "做一個可以待很久的聲音角落",
@@ -930,6 +954,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     "做一個讓時間變慢的聲音"
   ];
   let currentModalMode = "upload";
+  let selectedMobileBuilding = null;
+  let selectedMobileInstance = null;
+  const isMobileLike = () => window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 720;
+  const isMobileBuildingLimitReached = () => isMobileLike() && engine.instances.length >= MOBILE_BUILDING_LIMIT;
 
   titleBtn.addEventListener("click", () => infoModal.classList.add("show"));
   closeBtn.addEventListener("click", () => infoModal.classList.remove("show"));
@@ -944,6 +972,71 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   };
   uploadCloseBtn.addEventListener("click", closeUploadModal);
   uploadModal.addEventListener("click", (e) => { if (e.target === uploadModal) closeUploadModal(); });
+
+  function hideMobileControls() {
+    mobileControls.classList.remove("show");
+    mobileControls.setAttribute("aria-hidden", "true");
+    if (selectedMobileBuilding) selectedMobileBuilding.classList.remove("selected");
+    selectedMobileBuilding = null;
+    selectedMobileInstance = null;
+  }
+
+  function showMobileControls(building, instance) {
+    if (!isMobileLike()) return;
+    if (selectedMobileBuilding && selectedMobileBuilding !== building) {
+      selectedMobileBuilding.classList.remove("selected");
+    }
+    selectedMobileBuilding = building;
+    selectedMobileInstance = instance;
+    building.classList.add("selected");
+    const reg = SOURCE_REGISTRY[instance.type];
+    mobileControlsName.textContent = reg ? reg.title : "Brick";
+    mobileControls.classList.add("show");
+    mobileControls.setAttribute("aria-hidden", "false");
+  }
+
+  function moveSelectedBrick(direction) {
+    if (!selectedMobileBuilding || !selectedMobileInstance) return;
+    const building = selectedMobileBuilding;
+    const instance = selectedMobileInstance;
+    if (direction === "up" || direction === "down") {
+      const current = parseFloat(building.style.height) || 0;
+      const delta = direction === "up" ? 8 : -8;
+      const next = current + delta;
+      if (next <= 7) {
+        hideMobileControls();
+        instance.dispose();
+        engine.removeInstance(instance);
+        building.remove();
+        if (engine.instances.length === 0) {
+          setStatus("TAP THE EAR TO ADD A BRICK");
+          bottomHint.style.display = "block";
+        }
+        return;
+      }
+      building.style.height = `${Math.max(7, Math.min(100, next))}%`;
+      instance.setIntensity(Math.max(0.07, Math.min(1, next / 100)));
+      engine.updateAllPans();
+      setStatus("DRAG TO SHAPE THE CITY");
+      return;
+    }
+
+    const siblings = [...cityscape.querySelectorAll(".building")];
+    const idx = siblings.indexOf(building);
+    if (idx === -1) return;
+    if (direction === "left" && idx > 0) {
+      siblings[idx - 1].before(building);
+    } else if (direction === "right" && idx < siblings.length - 1) {
+      siblings[idx + 1].after(building);
+    }
+    engine.updateAllPans();
+  }
+
+  mobileControlsClose.addEventListener("click", hideMobileControls);
+  mobileUpBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); moveSelectedBrick("up"); });
+  mobileDownBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); moveSelectedBrick("down"); });
+  mobileLeftBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); moveSelectedBrick("left"); });
+  mobileRightBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); moveSelectedBrick("right"); });
 
   /* ===== 輔助函式 ===== */
   const getNextOrganicTime = (min, max) => min + Math.random() * (max - min);
@@ -1806,21 +1899,21 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   }
 
   async function requestBuilding(category = null) {
-    await ensurePlayback();
-    if (engine.instances.length >= MAX_BUILDINGS) {
-      setStatus("BRICKS FULL (MAX 10)", "#ff6b6b");
+    if (isMobileBuildingLimitReached()) {
+      setStatus(`MOBILE LIMIT REACHED (MAX ${MOBILE_BUILDING_LIMIT})`, "#ff6b6b");
       setTimeout(() => setStatus("TAP THE EAR TO ADD A BRICK"), 2000);
       return;
     }
+    await ensurePlayback();
     addRandomBuilding(category);
   }
   async function requestBuildingByKey(key) {
-    await ensurePlayback();
-    if (engine.instances.length >= MAX_BUILDINGS) {
-      setStatus("BRICKS FULL (MAX 10)", "#ff6b6b");
+    if (isMobileBuildingLimitReached()) {
+      setStatus(`MOBILE LIMIT REACHED (MAX ${MOBILE_BUILDING_LIMIT})`, "#ff6b6b");
       setTimeout(() => setStatus("TAP THE EAR TO ADD A BRICK"), 2000);
       return;
     }
+    await ensurePlayback();
     addBuildingByKey(key);
   }
 
@@ -1831,6 +1924,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   function addBuildingByKey(key) {
     const reg = SOURCE_REGISTRY[key];
     if (!reg) return;
+    if (isMobileBuildingLimitReached()) return;
     
     const building = document.createElement("div");
     building.className = "building";
@@ -1855,19 +1949,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     building.appendChild(label);
     setTimeout(() => label.remove(), 2200);
 
-    const dragHandle = document.createElement("div");
-    dragHandle.className = "drag-handle";
-    dragHandle.setAttribute("aria-hidden", "true");
-    dragHandle.innerHTML = '<div class="grip"><span></span><span></span><span></span></div><span>Drag</span>';
-    building.appendChild(dragHandle);
-    
-    const closeBtn = document.createElement("div");
-    closeBtn.className = "close-building-btn";
-    closeBtn.innerHTML = "×";
-    
     const removeBuilding = (e) => {
       if (e && e.cancelable) e.preventDefault();
       e.stopPropagation();
+      if (selectedMobileBuilding === building) hideMobileControls();
       inst.dispose();
       engine.removeInstance(inst);
       building.remove();
@@ -1876,12 +1961,6 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
         bottomHint.style.display = "block";
       }
     };
-    closeBtn.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    });
-    closeBtn.addEventListener("click", removeBuilding);
-    building.appendChild(closeBtn);
 
 
     const lineFill = document.createElement("div");
@@ -1916,7 +1995,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     cityscape.appendChild(building);
     bottomHint.style.display = "none";
     engine.updateAllPans();
-    setupBuildingDrag(building, inst);
+    setupBuildingDrag(building, inst, removeBuilding);
 
     setStatus("DRAG TO SHAPE THE CITY");
   }
@@ -1926,10 +2005,48 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     addBuildingByKey(randomKey);
   }
 
-  function setupBuildingDrag(element, instance) {
+  function setupBuildingDrag(element, instance, onRemove) {
+    if (isMobileLike()) {
+      const selectMobileBrick = (e) => {
+        if (e.target.closest && e.target.closest(".mobile-controls")) return;
+        if (e.target.closest && e.target.closest(".close-btn")) return;
+        e.stopPropagation();
+        showMobileControls(element, instance);
+      };
+      element.addEventListener("pointerup", selectMobileBrick);
+      element.addEventListener("click", selectMobileBrick);
+      return;
+    }
     let isDragging = false;
     let containerRect;
     let lastClientX = 0;
+    const cleanupDragListeners = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onEnd);
+      window.removeEventListener("pointercancel", onEnd);
+    };
+    const removeNow = (e) => {
+      cleanupDragListeners();
+      isDragging = false;
+      element.classList.remove("dragging");
+      onRemove(e);
+    };
+
+    const beginDrag = (e) => {
+      if (e && e.cancelable) e.preventDefault();
+      if (e.button !== undefined && e.button !== 0) return;
+      isDragging = true;
+      element.classList.add("dragging");
+      containerRect = cityscape.getBoundingClientRect();
+      lastClientX = e.clientX;
+      if (element.setPointerCapture && e.pointerId !== undefined) {
+        try { element.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onEnd);
+      window.addEventListener("pointercancel", onEnd);
+    };
+
     const onMove = (e) => {
       if (!isDragging) return;
       if (e.cancelable) e.preventDefault();
@@ -1939,6 +2056,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       lastClientX = clientX;
       
       let h = Math.max(5, Math.min(100, ((containerRect.bottom - clientY) / containerRect.height) * 100));
+      if (h <= 7) {
+        removeNow(e);
+        return;
+      }
       element.style.height = `${h}%`;
       instance.setIntensity(h / 100);
     };
@@ -1964,22 +2085,11 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
         }
       }
       engine.updateAllPans(); 
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onEnd);
-      window.removeEventListener("pointercancel", onEnd);
+      cleanupDragListeners();
     };
     const onStart = (e) => {
-      if (e.target.closest && e.target.closest(".close-building-btn")) return;
-      if (e.button !== undefined && e.button !== 0) return;
-      if (e.cancelable) e.preventDefault();
-      isDragging = true; element.classList.add("dragging");
-      containerRect = cityscape.getBoundingClientRect();
-      if (element.setPointerCapture && e.pointerId !== undefined) {
-        try { element.setPointerCapture(e.pointerId); } catch (_) {}
-      }
-      window.addEventListener("pointermove", onMove);
-      window.addEventListener("pointerup", onEnd);
-      window.addEventListener("pointercancel", onEnd);
+      e.stopPropagation();
+      beginDrag(e);
     };
     element.addEventListener("pointerdown", onStart);
   }
