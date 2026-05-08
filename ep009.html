@@ -958,6 +958,24 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   let selectedMobileInstance = null;
   const isMobileLike = () => window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 720;
   const isMobileBuildingLimitReached = () => isMobileLike() && engine.instances.length >= MOBILE_BUILDING_LIMIT;
+  function adjustMobileBuildingWidths() {
+    if (!isMobileLike()) return;
+    const buildings = [...cityscape.querySelectorAll(".building")];
+    if (!buildings.length) return;
+    const cityWidth = cityscape.getBoundingClientRect().width || window.innerWidth;
+    const gap = 6;
+    const available = Math.max(240, cityWidth - 20);
+    const cap = Math.max(40, Math.floor((available - gap * Math.max(0, buildings.length - 1)) / buildings.length));
+    buildings.forEach((building) => {
+      const currentWidth = parseFloat(building.style.width) || building.getBoundingClientRect().width;
+      if (currentWidth > cap) {
+        building.style.width = `${cap}px`;
+      }
+    });
+  }
+  window.addEventListener("resize", () => {
+    if (isMobileLike()) adjustMobileBuildingWidths();
+  });
 
   titleBtn.addEventListener("click", () => infoModal.classList.add("show"));
   closeBtn.addEventListener("click", () => infoModal.classList.remove("show"));
@@ -1242,10 +1260,15 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       this.player = new Tone.Player({ url: "Crowd.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
+      this.ready = this.player.load("Crowd.mp3");
     }
-    setPlaying(on) {
-      if (on) this.player.start();
-      else this.player.stop();
+    async setPlaying(on) {
+      if (on) {
+        await this.ready;
+        this.player.start();
+      } else {
+        this.player.stop();
+      }
     }
     dispose(){ super.dispose(); this.player.dispose(); }
   }
@@ -1255,7 +1278,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       this.player = new Tone.Player({ url: "gym_01.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
-      this.ready = this.player.load();
+      this.ready = this.player.load("gym_01.mp3");
     }
     async setPlaying(on) {
       if (on) {
@@ -1273,7 +1296,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       this.player = new Tone.Player({ url: "kitchen_01.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
-      this.ready = this.player.load();
+      this.ready = this.player.load("kitchen_01.mp3");
     }
     async setPlaying(on) {
       if (on) {
@@ -1291,7 +1314,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       this.player = new Tone.Player({ url: "street_01.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
-      this.ready = this.player.load();
+      this.ready = this.player.load("street_01.mp3");
     }
     async setPlaying(on) {
       if (on) {
@@ -1309,7 +1332,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       this.player = new Tone.Player({ url: "farm_01.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
-      this.ready = this.player.load();
+      this.ready = this.player.load("farm_01.mp3");
     }
     async setPlaying(on) {
       if (on) {
@@ -1321,6 +1344,33 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     }
     dispose(){ super.dispose(); this.player.dispose(); }
   }
+
+  const createLoopingPlayerSource = (url) => class extends BaseSource {
+    constructor(opts) {
+      super(opts);
+      this.player = new Tone.Player({ url, loop: true, autostart: false });
+      this.player.connect(this.channel);
+      this.player.playbackRate = 0.96 + Math.random() * 0.08;
+      this.ready = this.player.load(url);
+    }
+    async setPlaying(on) {
+      if (on) {
+        await this.ready;
+        this.player.start();
+      } else {
+        this.player.stop();
+      }
+    }
+    dispose() { super.dispose(); this.player.dispose(); }
+  };
+
+  const musicclassroom01 = createLoopingPlayerSource("musicclassroom_01.mp3");
+  const musicclassroom02 = createLoopingPlayerSource("musicclassroom_02.mp3");
+  const musicclassroom03 = createLoopingPlayerSource("musicclassroom_03.mp3");
+  const pianoFromAlley01 = createLoopingPlayerSource("piano_from_alley_01.mp3");
+  const pianoFromAlley02 = createLoopingPlayerSource("piano_from_alley_02.mp3");
+  const pianoFromAlley03 = createLoopingPlayerSource("piano_from_alley_03.mp3");
+
   class CityDrone extends BaseSource { constructor(opts){ super(opts); this.osc = new Tone.Oscillator(55, "triangle").start(); this.lp = new Tone.Filter(100).connect(this.channel); this.osc.connect(this.lp); } }
   class CityEvents extends BaseSource {
     constructor(opts){
@@ -1415,10 +1465,15 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       this.player = new Tone.Player({ url: "street_01.mp3", loop: true, autostart: false });
       this.player.connect(this.channel);
       this.player.playbackRate = 0.96 + Math.random() * 0.08;
+      this.ready = this.player.load("street_01.mp3");
     }
-    setPlaying(on) {
-      if (on) this.player.start();
-      else this.player.stop();
+    async setPlaying(on) {
+      if (on) {
+        await this.ready;
+        this.player.start();
+      } else {
+        this.player.stop();
+      }
     }
     dispose(){ super.dispose(); this.player.dispose(); }
   }
@@ -1605,7 +1660,13 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     street01: { cls: street01, title: "street01", vol: [0.45, 0.9], category: "atmosphere", label: "street01" },
     gym01: { cls: gym01, title: "gym01", vol: [0.45, 0.9], category: "infrastructure", label: "gym01" },
     kitchen01: { cls: kitchen01, title: "KITCHEN", vol: [0.45, 0.9], category: "activity", label: "Kitchen Room" },
-    farm01: { cls: farm01, title: "FARM", vol: [0.45, 0.9], category: "atmosphere", label: "Farm Field" }
+    farm01: { cls: farm01, title: "FARM", vol: [0.45, 0.9], category: "atmosphere", label: "Farm Field" },
+    musicclassroom01: { cls: musicclassroom01, title: "MUSIC CLASSROOM", vol: [0.45, 0.9], category: "activity", label: "Music Classroom" },
+    musicclassroom02: { cls: musicclassroom02, title: "MUSIC CLASSROOM", vol: [0.45, 0.9], category: "activity", label: "Music Classroom" },
+    musicclassroom03: { cls: musicclassroom03, title: "MUSIC CLASSROOM", vol: [0.45, 0.9], category: "activity", label: "Music Classroom" },
+    pianoFromAlley01: { cls: pianoFromAlley01, title: "PIANO ALLEY", vol: [0.45, 0.9], category: "atmosphere", label: "Piano Alley" },
+    pianoFromAlley02: { cls: pianoFromAlley02, title: "PIANO ALLEY", vol: [0.45, 0.9], category: "atmosphere", label: "Piano Alley" },
+    pianoFromAlley03: { cls: pianoFromAlley03, title: "PIANO ALLEY", vol: [0.45, 0.9], category: "atmosphere", label: "Piano Alley" }
   };
   let CATEGORY_KEYS = {};
   function rebuildCategoryKeys() {
@@ -1751,10 +1812,15 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
           super(opts);
           this.player = new Tone.Player({ url: customSampleUrl, loop: true, autostart: false });
           this.player.connect(this.channel);
+          this.ready = this.player.load(customSampleUrl);
         }
-        setPlaying(on) {
-          if (on) this.player.start();
-          else this.player.stop();
+        async setPlaying(on) {
+          if (on) {
+            await this.ready;
+            this.player.start();
+          } else {
+            this.player.stop();
+          }
         }
         dispose(){ super.dispose(); this.player.dispose(); }
       },
@@ -1931,14 +1997,22 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     building.dataset.category = reg.category;
     const mobileLayout = window.matchMedia("(max-width: 720px)").matches;
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const mobileCap = Math.max(40, Math.floor(((cityscape.getBoundingClientRect().width || window.innerWidth) - 20 - (MOBILE_BUILDING_LIMIT - 1) * 6) / MOBILE_BUILDING_LIMIT));
+    const mobileBaseMin = Math.max(36, mobileCap - 20);
+    const mobileBaseMax = Math.max(mobileBaseMin, mobileCap - 4);
+    const mobileWideMin = Math.max(44, mobileCap - 8);
+    const mobileWideMax = Math.max(mobileWideMin, Math.min(mobileCap + 10, mobileCap + 12));
     const width = Math.random() < 0.1
-      ? (coarsePointer ? 132 + Math.floor(Math.random() * 42) : mobileLayout ? 120 + Math.floor(Math.random() * 30) : 180 + Math.floor(Math.random() * 60))
-      : (coarsePointer ? 58 + Math.floor(Math.random() * 52) : mobileLayout ? 42 + Math.floor(Math.random() * 78) : 55 + Math.floor(Math.random() * 106));
+      ? (coarsePointer ? mobileWideMin + Math.floor(Math.random() * (mobileWideMax - mobileWideMin + 1)) : mobileLayout ? 120 + Math.floor(Math.random() * 30) : 180 + Math.floor(Math.random() * 60))
+      : (coarsePointer ? mobileBaseMin + Math.floor(Math.random() * (mobileBaseMax - mobileBaseMin + 1)) : mobileLayout ? 42 + Math.floor(Math.random() * 78) : 55 + Math.floor(Math.random() * 106));
     building.style.width = `${width}px`;
     const initialIntensity = reg.vol[0] + Math.random() * (reg.vol[1] - reg.vol[0]);
     building.style.height = `${Math.max(15, initialIntensity * 100)}%`;
     
     const inst = engine.ensure(key, reg.cls, { type: key, intensity: initialIntensity, el: building });
+    if (isAudioPlaying && typeof inst.setPlaying === "function") {
+      void inst.setPlaying(true);
+    }
 
     building.classList.add("drop-in");
     setTimeout(() => building.classList.remove("drop-in"), 800);
@@ -1993,6 +2067,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     building.appendChild(name);
     
     cityscape.appendChild(building);
+    adjustMobileBuildingWidths();
     bottomHint.style.display = "none";
     engine.updateAllPans();
     setupBuildingDrag(building, inst, removeBuilding);
