@@ -358,9 +358,12 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 2px 4px 6px 2px;
+      padding-right: 10px;
       scrollbar-width: thin;
       scrollbar-color: rgba(244,237,220,0.35) transparent;
       user-select: none;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
     }
     .source-menu-strip::-webkit-scrollbar {
       width: 8px;
@@ -398,7 +401,7 @@
       justify-content: space-between;
       text-align: left;
       user-select: none;
-      touch-action: manipulation;
+      touch-action: pan-y;
       transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
     }
     .source-menu-card:active,
@@ -485,11 +488,11 @@
         height: 28px;
       }
       .source-menu-card {
-        min-height: 104px;
+        min-height: 92px;
       }
       .source-menu-card.upload {
-        min-height: 86px;
-        padding: 10px 10px 8px;
+        min-height: 80px;
+        padding: 9px 10px 7px;
       }
       .source-menu-panel::before,
       .source-menu-panel::after {
@@ -2224,6 +2227,56 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       category: reg.category || "misc"
     };
   };
+  function attachSourceCardInteraction(card, key) {
+    const state = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      startScrollTop: 0,
+      moved: false
+    };
+    const TAP_THRESHOLD = 12;
+    const reset = () => {
+      state.pointerId = null;
+      state.startX = 0;
+      state.startY = 0;
+      state.startScrollTop = 0;
+      state.moved = false;
+      card.classList.remove("pressed");
+    };
+    card.addEventListener("pointerdown", (e) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      state.pointerId = e.pointerId;
+      state.startX = e.clientX;
+      state.startY = e.clientY;
+      state.startScrollTop = sourceMenuStrip.scrollTop;
+      state.moved = false;
+      card.classList.add("pressed");
+      try { card.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    card.addEventListener("pointermove", (e) => {
+      if (state.pointerId === null || e.pointerId !== state.pointerId) return;
+      const dx = Math.abs(e.clientX - state.startX);
+      const dy = Math.abs(e.clientY - state.startY);
+      const scrollDelta = Math.abs(sourceMenuStrip.scrollTop - state.startScrollTop);
+      if (dx > TAP_THRESHOLD || dy > TAP_THRESHOLD || scrollDelta > TAP_THRESHOLD) {
+        state.moved = true;
+        card.classList.remove("pressed");
+      }
+    });
+    card.addEventListener("pointerup", (e) => {
+      if (state.pointerId === null || e.pointerId !== state.pointerId) return;
+      const dx = Math.abs(e.clientX - state.startX);
+      const dy = Math.abs(e.clientY - state.startY);
+      const scrollDelta = Math.abs(sourceMenuStrip.scrollTop - state.startScrollTop);
+      const isTap = !state.moved && dx <= TAP_THRESHOLD && dy <= TAP_THRESHOLD && scrollDelta <= TAP_THRESHOLD;
+      reset();
+      if (!isTap) return;
+      selectSourceCard(key, card);
+    });
+    card.addEventListener("pointercancel", reset);
+    card.addEventListener("lostpointercapture", reset);
+  }
   function buildSourceMenu() {
     sourceMenuStrip.innerHTML = "";
     const groups = [
@@ -2251,10 +2304,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
           <div class="source-menu-card-title">${meta.title}</div>
           <div class="source-menu-card-meta">${key === "random" ? meta.meta : meta.meta}</div>
         `;
-        card.addEventListener("pointerup", (e) => {
-          if (e.button !== undefined && e.button !== 0) return;
-          selectSourceCard(key, card);
-        });
+        attachSourceCardInteraction(card, key);
         grid.appendChild(card);
       }
       section.appendChild(title);
