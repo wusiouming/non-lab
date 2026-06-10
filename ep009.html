@@ -53,13 +53,13 @@
     .sound-waves {
       position: absolute;
       left: 50%;
-      top: 16%;
+      top: 12%;
       transform: translateX(-50%);
       width: min(760px, 92vw);
-      height: 120px;
+      height: 180px;
       z-index: 2;
       pointer-events: none;
-      opacity: 0.65;
+      opacity: 0.72;
       mix-blend-mode: soft-light;
     }
     .bottom-hint {
@@ -83,6 +83,71 @@
       fill: none;
       stroke: rgba(244,237,220,0.55);
       stroke-width: 1.8;
+    }
+    .category-waves {
+      pointer-events: none;
+    }
+    .category-wave-lane {
+      fill: rgba(10,15,20,0.14);
+      stroke: rgba(244,237,220,0.08);
+      stroke-width: 1;
+    }
+    .category-wave-track,
+    .category-wave-fill {
+      fill: none;
+      vector-effect: non-scaling-stroke;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .category-wave-marker {
+      vector-effect: non-scaling-stroke;
+      stroke-linecap: round;
+      opacity: 0.15;
+    }
+    .category-wave-track {
+      stroke: var(--category-color, rgba(244,237,220,0.26));
+      stroke-width: 2.15;
+      opacity: 0.52;
+    }
+    .category-wave-fill {
+      stroke: var(--category-color, rgba(244,237,220,0.75));
+      stroke-width: 3.25;
+      opacity: 0.96;
+    }
+    .category-wave-thumb {
+      fill: var(--category-color, rgba(244,237,220,0.85));
+      opacity: 0.98;
+      filter: drop-shadow(0 0 7px rgba(244,237,220,0.12));
+    }
+    .category-wave-label {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      fill: rgba(244,237,220,0.56);
+      text-transform: uppercase;
+    }
+    .category-wave-progress-text {
+      font-family: 'Spectral', Georgia, serif;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      fill: rgba(244,237,220,0.32);
+    }
+    .category-wave.is-pulsing .category-wave-fill,
+    .category-wave.is-pulsing .category-wave-thumb {
+      opacity: 1;
+    }
+    .category-wave.is-resetting .category-wave-track {
+      opacity: 0.32;
+    }
+    .category-wave.is-resetting .category-wave-fill {
+      opacity: 0.72;
+    }
+    .category-wave.is-resetting .category-wave-thumb {
+      opacity: 1;
+    }
+    .sound-waves.growth-pulse {
+      opacity: 0.94;
+      filter: drop-shadow(0 0 14px rgba(244,237,220,0.16));
     }
     body::after {
       content: "";
@@ -142,7 +207,11 @@
       text-transform: uppercase;
       z-index: 10;
       pointer-events: none;
-      transition: color 0.3s;
+      transition: color 0.35s, opacity 0.35s;
+      opacity: 1;
+    }
+    .status.is-transient {
+      opacity: 0.88;
     }
     .recording-pill {
       position: fixed;
@@ -389,6 +458,7 @@
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
     .source-menu-card {
+      position: relative;
       width: 100%;
       min-height: 112px;
       border-radius: 18px;
@@ -403,6 +473,20 @@
       user-select: none;
       touch-action: pan-y;
       transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+    .source-menu-card.locked {
+      opacity: 0.34;
+      border-color: rgba(241,235,217,0.08);
+      background: rgba(17,24,32,0.42);
+      filter: saturate(0.6);
+    }
+    .source-menu-card.locked .source-menu-card-label,
+    .source-menu-card.locked .source-menu-card-title,
+    .source-menu-card.locked .source-menu-card-meta {
+      opacity: 0.7;
+    }
+    .source-menu-card.pressed {
+      transform: scale(0.985);
     }
     .source-menu-card:active,
     .source-menu-card.active {
@@ -499,7 +583,15 @@
         font-size: 1.45rem;
       }
       .source-menu-grid {
-        grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .source-menu-strip {
+        padding-right: 12px;
+        max-height: min(56vh, 520px);
+      }
+      .source-menu-grid .source-menu-card-title {
+        font-size: 1.15rem;
       }
     }
 
@@ -798,10 +890,10 @@
   }
 
   .sound-waves {
-    top: 13%;
+    top: 10%;
     width: 96vw;
-    height: 84px;
-    opacity: 0.42;
+    height: 152px;
+    opacity: 0.58;
   }
 
   .ear-container {
@@ -1074,7 +1166,7 @@
   </div>
 
   <div class="stars-container" id="starsContainer"></div>
-  <svg class="sound-waves" id="soundWaves" viewBox="0 0 800 140" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <svg class="sound-waves" id="soundWaves" viewBox="0 0 800 180" preserveAspectRatio="none" aria-hidden="true"></svg>
   <div class="bottom-hint" id="bottomHint">Tap the ear to place a brick</div>
 
   <div class="cityscape" id="cityscape"></div>
@@ -1412,6 +1504,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     constructor(opts) {
       this.engine = opts.engine;
       this.type = opts.type;
+      this.category = opts.category || null;
       this.intensity = opts.intensity;
       this.el = opts.el || null;
       this.active = true;
@@ -1990,6 +2083,344 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   }
   rebuildCategoryKeys();
 
+  const GROWTH_STORAGE_KEY = "sound-bricks-growth-v1";
+  const CATEGORY_ORDER = ["atmosphere", "activity", "infrastructure"];
+  const CATEGORY_START_UNLOCKED = 6;
+  const CATEGORY_UNLOCK_BASE = 8;
+  const CATEGORY_UNLOCK_STEP = 6;
+  const GROWTH_TICK_MS = 2400;
+  const LISTEN_EMA_DECAY = 0.82;
+  const GROWTH_MESSAGES = {
+    atmosphere: [
+      "A new atmosphere entered the city.",
+      "The city learned a new texture.",
+      "A distant air appeared tonight."
+    ],
+    activity: [
+      "A new rhythm arrived in the city.",
+      "The city learned a new movement.",
+      "Something small began to happen again."
+    ],
+    infrastructure: [
+      "A new structure was heard in the dark.",
+      "The city learned a new support.",
+      "A far-off frame quietly appeared."
+    ]
+  };
+  const GROWTH_GLOW = {
+    atmosphere: "rgba(240,230,210,0.18)",
+    activity: "rgba(217,92,20,0.16)",
+    infrastructure: "rgba(42,92,90,0.18)"
+  };
+  let categoryEnergy = {
+    atmosphere: 0,
+    activity: 0,
+    infrastructure: 0
+  };
+  let categoryUnlockedCount = {
+    atmosphere: 0,
+    activity: 0,
+    infrastructure: 0
+  };
+  let categoryListenMomentum = {
+    atmosphere: 0,
+    activity: 0,
+    infrastructure: 0
+  };
+  let categoryWaveVisualProgress = {
+    atmosphere: 0,
+    activity: 0,
+    infrastructure: 0
+  };
+  let categoryWaveResetUntil = {
+    atmosphere: 0,
+    activity: 0,
+    infrastructure: 0
+  };
+  let staySession = {
+    startedAt: 0,
+    microPhase: Math.random() * Math.PI * 2,
+    nextWhisperAt: 0,
+    whisperIndex: 0
+  };
+  const STAY_WHISPERS = {
+    atmosphere: [
+      "The air is settling in.",
+      "A quieter layer is forming.",
+      "The atmosphere is deepening."
+    ],
+    activity: [
+      "The city keeps moving softly.",
+      "A small rhythm is holding.",
+      "Something active is staying."
+    ],
+    infrastructure: [
+      "The structure is becoming steadier.",
+      "The frame is holding its shape.",
+      "A quieter support is growing."
+    ],
+    general: [
+      "The city is still listening.",
+      "Stay a little longer.",
+      "Something quiet is unfolding."
+    ]
+  };
+  let growthPulse = {
+    category: null,
+    until: 0
+  };
+  let growthTickHandle = null;
+  let statusRestoreHandle = null;
+  let statusToken = 0;
+  let persistentStatus = {
+    text: "TAP THE EAR TO ADD A BRICK",
+    color: null
+  };
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const totalEnergy = () => CATEGORY_ORDER.reduce((sum, category) => sum + (categoryEnergy[category] || 0), 0);
+  function getCategoryKeys(category) {
+    return CATEGORY_KEYS[category] || [];
+  }
+  function getUnlockedCount(category) {
+    const keys = getCategoryKeys(category);
+    return clamp(categoryUnlockedCount[category] || 0, 0, keys.length);
+  }
+  function getSourceCategory(key) {
+    if (key === "random" || key === "upload") return null;
+    const reg = SOURCE_REGISTRY[key];
+    return reg ? reg.category : null;
+  }
+  function getUnlockThreshold(category) {
+    const unlocked = getUnlockedCount(category);
+    const stepIndex = Math.max(0, unlocked - CATEGORY_START_UNLOCKED);
+    return CATEGORY_UNLOCK_BASE + stepIndex * CATEGORY_UNLOCK_STEP;
+  }
+  function isSourceUnlocked(key) {
+    if (key === "random" || key === "upload") return true;
+    if (key.startsWith("custom_")) return true;
+    const category = getSourceCategory(key);
+    if (!category) return true;
+    const keys = getCategoryKeys(category);
+    const index = keys.indexOf(key);
+    if (index < 0) return true;
+    return index < getUnlockedCount(category);
+  }
+  function applyStatus(text, color = null, opacity = 1) {
+    statusText.textContent = text;
+    statusText.style.color = color || "var(--accent)";
+    statusText.style.opacity = opacity;
+    statusText.classList.toggle("is-transient", opacity < 1);
+  }
+  function setStatus(text, color = null) {
+    statusToken += 1;
+    persistentStatus = { text, color };
+    if (statusRestoreHandle) {
+      clearTimeout(statusRestoreHandle);
+      statusRestoreHandle = null;
+    }
+    applyStatus(text, color, 1);
+  }
+  function showTransientStatus(text, color = null, duration = 2600) {
+    const token = ++statusToken;
+    const fallback = { ...persistentStatus };
+    if (statusRestoreHandle) clearTimeout(statusRestoreHandle);
+    applyStatus(text, color, 0.88);
+    requestAnimationFrame(() => {
+      if (token === statusToken) applyStatus(text, color, 1);
+    });
+    statusRestoreHandle = setTimeout(() => {
+      if (token !== statusToken) return;
+      persistentStatus = fallback;
+      applyStatus(fallback.text, fallback.color, 1);
+    }, duration);
+  }
+  function syncSourceCardState(card, key) {
+    const unlocked = isSourceUnlocked(key);
+    card.classList.toggle("locked", !unlocked);
+    card.dataset.locked = unlocked ? "false" : "true";
+    card.setAttribute("aria-disabled", unlocked ? "false" : "true");
+  }
+  function refreshSourceMenuStates() {
+    if (!sourceMenuStrip) return;
+    sourceMenuStrip.querySelectorAll(".source-menu-card").forEach((card) => {
+      const key = card.dataset.key;
+      if (!key) return;
+      syncSourceCardState(card, key);
+    });
+  }
+  function saveGrowthState() {
+    try {
+      const payload = {
+        version: 1,
+        categoryEnergy,
+        categoryUnlockedCount
+      };
+      localStorage.setItem(GROWTH_STORAGE_KEY, JSON.stringify(payload));
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+  function loadGrowthState() {
+    try {
+      const raw = localStorage.getItem(GROWTH_STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved && saved.categoryEnergy) {
+        CATEGORY_ORDER.forEach((category) => {
+          if (typeof saved.categoryEnergy[category] === "number") {
+            categoryEnergy[category] = Math.max(0, saved.categoryEnergy[category]);
+          }
+        });
+      }
+      if (saved && saved.categoryUnlockedCount) {
+        CATEGORY_ORDER.forEach((category) => {
+          const keys = getCategoryKeys(category);
+          const savedCount = typeof saved.categoryUnlockedCount[category] === "number" ? saved.categoryUnlockedCount[category] : CATEGORY_START_UNLOCKED;
+          categoryUnlockedCount[category] = clamp(savedCount, CATEGORY_START_UNLOCKED, keys.length);
+        });
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+  function pulseGrowthWave(category) {
+    growthPulse.category = category;
+    growthPulse.until = performance.now() + 1600;
+    if (soundWaves) {
+      soundWaves.classList.add("growth-pulse");
+      soundWaves.style.filter = `drop-shadow(0 0 10px ${GROWTH_GLOW[category] || "rgba(244,237,220,0.12)"})`;
+    }
+    setTimeout(() => {
+      if (performance.now() >= growthPulse.until && soundWaves) {
+        soundWaves.classList.remove("growth-pulse");
+        soundWaves.style.filter = "";
+      }
+    }, 1700);
+  }
+  function resetStaySession() {
+    const now = performance.now();
+    staySession.startedAt = now;
+    staySession.microPhase = Math.random() * Math.PI * 2;
+    staySession.whisperIndex = 0;
+    staySession.nextWhisperAt = now + 22000 + Math.random() * 16000;
+  }
+  function getDominantCategory() {
+    let topCategory = null;
+    let topValue = -1;
+    CATEGORY_ORDER.forEach((category) => {
+      const value = categoryEnergy[category] || 0;
+      if (value > topValue) {
+        topValue = value;
+        topCategory = category;
+      }
+    });
+    return topCategory;
+  }
+  function maybeEmitStayWhisper(now) {
+    if (!isAudioPlaying || !engine.instances.length || sourceMenuOpen || recorderState.active) return;
+    if (!staySession.nextWhisperAt || now < staySession.nextWhisperAt) return;
+    const category = getDominantCategory();
+    const pool = STAY_WHISPERS[category] || STAY_WHISPERS.general;
+    const message = pool[staySession.whisperIndex % pool.length];
+    staySession.whisperIndex += 1;
+    showTransientStatus(message, null, 2400);
+    staySession.nextWhisperAt = now + 26000 + Math.random() * 22000;
+  }
+  function maybeUnlockNext(category, sourceKey = null) {
+    const keys = getCategoryKeys(category);
+    const unlocked = getUnlockedCount(category);
+    if (unlocked >= keys.length) return false;
+    const threshold = getUnlockThreshold(category);
+    if (categoryEnergy[category] < threshold) return false;
+    categoryEnergy[category] = Math.max(0, categoryEnergy[category] - threshold);
+    categoryUnlockedCount[category] = clamp(unlocked + 1, CATEGORY_START_UNLOCKED, keys.length);
+    const nextKey = keys[categoryUnlockedCount[category] - 1];
+    const messagePool = GROWTH_MESSAGES[category] || [];
+    const message = messagePool.length ? messagePool[Math.floor(Math.random() * messagePool.length)] : "The city learned something new.";
+    showTransientStatus(message, null, 2800);
+    pulseGrowthWave(category);
+    categoryWaveVisualProgress[category] = 0;
+    categoryWaveResetUntil[category] = performance.now() + 700;
+    saveGrowthState();
+    refreshSourceMenuStates();
+    return nextKey || false;
+  }
+  function syncGrowthUnlocksSilently() {
+    let changed = false;
+    CATEGORY_ORDER.forEach((category) => {
+      const keys = getCategoryKeys(category);
+      let unlocked = getUnlockedCount(category);
+      while (unlocked < keys.length) {
+        const threshold = getUnlockThreshold(category);
+        if (categoryEnergy[category] < threshold) break;
+        categoryEnergy[category] = Math.max(0, categoryEnergy[category] - threshold);
+        unlocked = clamp(unlocked + 1, CATEGORY_START_UNLOCKED, keys.length);
+        categoryUnlockedCount[category] = unlocked;
+        changed = true;
+      }
+    });
+    if (changed) refreshSourceMenuStates();
+    return changed;
+  }
+  function awardCategoryEnergy(category, amount, sourceKey = null) {
+    if (!CATEGORY_ORDER.includes(category)) return;
+    categoryEnergy[category] += amount;
+    if (categoryEnergy[category] < 0) categoryEnergy[category] = 0;
+    saveGrowthState();
+    return maybeUnlockNext(category, sourceKey);
+  }
+  function tickCategoryEnergy() {
+    const listenScore = {
+      atmosphere: 0,
+      activity: 0,
+      infrastructure: 0
+    };
+    const counts = {
+      atmosphere: 0,
+      activity: 0,
+      infrastructure: 0
+    };
+    engine.instances.forEach((inst) => {
+      if (inst && inst.active && CATEGORY_ORDER.includes(inst.category)) {
+        counts[inst.category] += 1;
+        const intensity = Math.max(0.06, Math.min(1, inst.intensity || 0));
+        listenScore[inst.category] += Math.pow(intensity, 0.86);
+      }
+    });
+    CATEGORY_ORDER.forEach((category) => {
+      const currentListen = listenScore[category];
+      const previousListen = categoryListenMomentum[category] || 0;
+      const smoothedListen = previousListen * LISTEN_EMA_DECAY + currentListen * (1 - LISTEN_EMA_DECAY);
+      categoryListenMomentum[category] = smoothedListen;
+      if (!currentListen) return;
+      const listeningWeight = 1 - Math.exp(-smoothedListen / 2.3);
+      const activeBonus = counts[category] >= 3 ? 1.18 : 1;
+      const dwellBoost = 1 + Math.min(0.28, ((performance.now() - staySession.startedAt) / 90000) * 0.28);
+      const gain = (0.45 + smoothedListen * 0.22) * listeningWeight * activeBonus * dwellBoost * (GROWTH_TICK_MS / 2400);
+      awardCategoryEnergy(category, gain);
+    });
+    if (!engine.instances.length) {
+      CATEGORY_ORDER.forEach((category) => {
+        categoryListenMomentum[category] *= 0.9;
+      });
+    }
+  }
+  function ensureGrowthClock() {
+    if (growthTickHandle) return;
+    growthTickHandle = setInterval(tickCategoryEnergy, GROWTH_TICK_MS);
+  }
+  loadGrowthState();
+  CATEGORY_ORDER.forEach((category) => {
+    const keys = getCategoryKeys(category);
+    if (!categoryUnlockedCount[category]) {
+      categoryUnlockedCount[category] = clamp(Math.min(CATEGORY_START_UNLOCKED, keys.length), 0, keys.length);
+    } else {
+      categoryUnlockedCount[category] = clamp(categoryUnlockedCount[category], CATEGORY_START_UNLOCKED, keys.length);
+    }
+  });
+  syncGrowthUnlocksSilently();
+  saveGrowthState();
+
   /* ===== 5. UI 與應用程式邏輯 ===== */
   let engine = new SoundscapeEngine();
   const earBtn = document.getElementById("generateBtn");
@@ -2002,31 +2433,268 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   const sourceMenuStrip = document.getElementById("sourceMenuStrip");
   const bottomHint = document.getElementById("bottomHint");
   const soundWaves = document.getElementById("soundWaves");
-  let waveLines = [];
-  function updateWaveLines(count) {
-    const current = waveLines.length;
-    if (count === current) return;
-    if (count > current) {
-      for (let i = current; i < count; i++) {
-        const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        p.setAttribute("class", "wave-line");
-        soundWaves.appendChild(p);
-        waveLines.push(p);
-      }
-    } else {
-      for (let i = current - 1; i >= count; i--) {
-        waveLines[i].remove();
-        waveLines.pop();
-      }
+  let categoryWaves = {};
+  const CATEGORY_WAVE_LAYOUT = {
+    atmosphere: {
+      y: 30,
+      color: "var(--atmo-line)",
+      soft: "rgba(240,230,210,0.16)",
+      bright: "rgba(240,230,210,0.98)",
+      lane: "rgba(240,230,210,0.08)",
+      speed: 0.78,
+      density: 1.08,
+      amp: 5.2,
+      phase: 0.2,
+      label: "ATMOS"
+    },
+    activity: {
+      y: 90,
+      color: "var(--act-line)",
+      soft: "rgba(217,92,20,0.16)",
+      bright: "rgba(217,92,20,0.98)",
+      lane: "rgba(217,92,20,0.08)",
+      speed: 1.05,
+      density: 1.32,
+      amp: 5.9,
+      phase: 1.15,
+      label: "ACT"
+    },
+    infrastructure: {
+      y: 150,
+      color: "var(--infra-line)",
+      soft: "rgba(42,92,90,0.16)",
+      bright: "rgba(42,92,90,0.98)",
+      lane: "rgba(42,92,90,0.08)",
+      speed: 0.68,
+      density: 0.94,
+      amp: 4.9,
+      phase: 2.1,
+      label: "INFRA"
     }
+  };
+  const WAVE_X1 = 24;
+  const WAVE_X2 = 776;
+  const WAVE_LANE_PADDING = 18;
+  const WAVE_SAMPLES = 14;
+  function getCategoryGrowthProgress(category) {
+    const threshold = getUnlockThreshold(category);
+    if (!threshold) return 0;
+    return clamp((categoryEnergy[category] || 0) / threshold, 0, 1);
   }
+  function buildCategoryWaveforms() {
+    if (!soundWaves || Object.keys(categoryWaves).length) return;
+    const ns = "http://www.w3.org/2000/svg";
+    const root = document.createElementNS(ns, "g");
+    root.setAttribute("class", "category-waves");
+    const defs = document.createElementNS(ns, "defs");
+    root.appendChild(defs);
+    CATEGORY_ORDER.forEach((category) => {
+      const layout = CATEGORY_WAVE_LAYOUT[category];
+      if (!layout) return;
+      const row = document.createElementNS(ns, "g");
+      row.setAttribute("class", `category-wave category-wave-${category}`);
+      row.style.setProperty("--category-color", layout.color);
+      const gradId = `category-wave-gradient-${category}`;
+      const gradient = document.createElementNS(ns, "linearGradient");
+      gradient.setAttribute("id", gradId);
+      gradient.setAttribute("gradientUnits", "userSpaceOnUse");
+      gradient.setAttribute("x1", String(WAVE_X1));
+      gradient.setAttribute("x2", String(WAVE_X2));
+      gradient.setAttribute("y1", String(layout.y));
+      gradient.setAttribute("y2", String(layout.y));
+      const gradientStops = [
+        [0, layout.soft, 0.42],
+        [0.55, layout.bright, 0.9],
+        [1, layout.bright, 0.98]
+      ];
+      gradientStops.forEach(([offset, color, opacity]) => {
+        const stop = document.createElementNS(ns, "stop");
+        stop.setAttribute("offset", `${offset * 100}%`);
+        stop.setAttribute("stop-color", color);
+        stop.setAttribute("stop-opacity", String(opacity));
+        gradient.appendChild(stop);
+      });
+      defs.appendChild(gradient);
+      const clipId = `category-wave-clip-${category}`;
+      const clipPath = document.createElementNS(ns, "clipPath");
+      clipPath.setAttribute("id", clipId);
+      const clipRect = document.createElementNS(ns, "rect");
+      clipRect.setAttribute("x", String(WAVE_X1));
+      clipRect.setAttribute("y", String(layout.y - 16));
+      clipRect.setAttribute("width", "0");
+      clipRect.setAttribute("height", "40");
+      clipRect.setAttribute("rx", "18");
+      clipPath.appendChild(clipRect);
+      defs.appendChild(clipPath);
+      const lane = document.createElementNS(ns, "rect");
+      lane.setAttribute("class", "category-wave-lane");
+      lane.setAttribute("x", String(WAVE_X1 - WAVE_LANE_PADDING));
+      lane.setAttribute("y", String(layout.y - 20));
+      lane.setAttribute("width", String((WAVE_X2 - WAVE_X1) + WAVE_LANE_PADDING * 2));
+      lane.setAttribute("height", "40");
+      lane.setAttribute("rx", "18");
+      const track = document.createElementNS(ns, "path");
+      track.setAttribute("class", "category-wave-track");
+      const fill = document.createElementNS(ns, "path");
+      fill.setAttribute("class", "category-wave-fill");
+      fill.setAttribute("clip-path", `url(#${clipId})`);
+      fill.setAttribute("stroke", `url(#${gradId})`);
+      track.setAttribute("stroke", layout.lane);
+      const thumb = document.createElementNS(ns, "circle");
+      thumb.setAttribute("class", "category-wave-thumb");
+      thumb.setAttribute("r", "5.4");
+      const halo = document.createElementNS(ns, "circle");
+      halo.setAttribute("class", "category-wave-thumb");
+      halo.setAttribute("r", "8.8");
+      halo.style.fill = layout.bright;
+      halo.style.opacity = "0.16";
+      const markers = [];
+      for (let i = 0; i < 8; i++) {
+        const marker = document.createElementNS(ns, "line");
+        marker.setAttribute("class", "category-wave-marker");
+        const x = WAVE_X1 + ((WAVE_X2 - WAVE_X1) * (i + 1)) / 9;
+        marker.setAttribute("x1", x.toFixed(2));
+        marker.setAttribute("x2", x.toFixed(2));
+        marker.setAttribute("y1", String(layout.y - 11));
+        marker.setAttribute("y2", String(layout.y + 11));
+        marker.style.stroke = layout.bright;
+        marker.style.opacity = "0.15";
+        markers.push(marker);
+      }
+      const label = document.createElementNS(ns, "text");
+      label.setAttribute("class", "category-wave-label");
+      label.setAttribute("x", "10");
+      label.setAttribute("y", String(layout.y + 4));
+      label.textContent = layout.label;
+      const progressText = document.createElementNS(ns, "text");
+      progressText.setAttribute("class", "category-wave-progress-text");
+      progressText.setAttribute("x", "738");
+      progressText.setAttribute("y", String(layout.y + 4));
+      progressText.textContent = "LISTENING";
+      markers.forEach((marker) => row.appendChild(marker));
+      row.appendChild(lane);
+      row.appendChild(label);
+      row.appendChild(progressText);
+      row.appendChild(track);
+      row.appendChild(fill);
+      row.appendChild(halo);
+      row.appendChild(thumb);
+      root.appendChild(row);
+      categoryWaves[category] = { row, lane, track, fill, thumb, halo, label, progressText, clipRect, markers, layout };
+    });
+    soundWaves.appendChild(root);
+  }
+  function catmullRomToBezier(points) {
+    if (!points.length) return "";
+    if (points.length === 1) return `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;
+    let d = `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)} ${cp2x.toFixed(2)} ${cp2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+    }
+    return d;
+  }
+  function sampleCategoryWave(category, x, progress, activeCount, pulseStrength, time, dwell) {
+    const layout = CATEGORY_WAVE_LAYOUT[category];
+    const span = WAVE_X2 - WAVE_X1;
+    const xNorm = clamp((x - WAVE_X1) / span, 0, 1);
+    const amp = layout.amp + progress * 6.4 + activeCount * 0.8 + pulseStrength * 4.2 + dwell * 2.2;
+    const density = layout.density + progress * 0.75 + activeCount * 0.05 + dwell * 0.24;
+    const phase = time * layout.speed + layout.phase + activeCount * 0.22 + dwell * 0.45;
+    const wave1 = Math.sin((xNorm * Math.PI * 2 * density) + phase) * amp;
+    const wave2 = Math.sin((xNorm * Math.PI * 4.3) - phase * 0.72) * amp * 0.28;
+    const wave3 = Math.sin((xNorm * Math.PI * 9.2) + phase * 1.4) * amp * 0.1;
+    return layout.y + wave1 + wave2 + wave3;
+  }
+  function updateCategoryWaveforms() {
+    const now = performance.now();
+    const dwell = isAudioPlaying && staySession.startedAt ? clamp((now - staySession.startedAt) / 150000, 0, 1) : 0;
+    const dwellBreath = 0.5 + 0.5 * Math.sin(now * 0.00007 + staySession.microPhase);
+    const pulseStrength = growthPulse.until > now ? Math.max(0, (growthPulse.until - now) / 1600) : 0;
+    const energyMix = Math.max(0, Math.min(1, totalEnergy() / 80));
+    const counts = {
+      atmosphere: 0,
+      activity: 0,
+      infrastructure: 0
+    };
+    engine.instances.forEach((inst) => {
+      if (inst && inst.active && CATEGORY_ORDER.includes(inst.category)) {
+        counts[inst.category] += 1;
+      }
+    });
+    CATEGORY_ORDER.forEach((category) => {
+      const wave = categoryWaves[category];
+      if (!wave) return;
+      const layout = wave.layout;
+      const targetProgress = getCategoryGrowthProgress(category);
+      const resetUntil = categoryWaveResetUntil[category] || 0;
+      if (now < resetUntil) {
+        categoryWaveVisualProgress[category] = 0;
+      } else {
+        const current = categoryWaveVisualProgress[category] || 0;
+        const eased = current + (targetProgress - current) * 0.12;
+        categoryWaveVisualProgress[category] = clamp(eased, 0, 1);
+      }
+      const progress = categoryWaveVisualProgress[category] || 0;
+      const activeCount = counts[category] || 0;
+      const points = [];
+      for (let i = 0; i <= WAVE_SAMPLES; i++) {
+        const x = WAVE_X1 + ((WAVE_X2 - WAVE_X1) * i) / WAVE_SAMPLES;
+        const y = sampleCategoryWave(category, x, progress, activeCount, pulseStrength, now * 0.0012, dwell);
+        points.push({ x, y });
+      }
+      const d = catmullRomToBezier(points);
+      wave.track.setAttribute("d", d);
+      wave.fill.setAttribute("d", d);
+      const visibleWidth = Math.max(0, (WAVE_X2 - WAVE_X1) * progress);
+      wave.clipRect.setAttribute("width", visibleWidth.toFixed(2));
+      wave.track.style.opacity = (0.78 + progress * 0.14 + activeCount * 0.015 + dwell * 0.08).toFixed(2);
+      wave.fill.style.opacity = (0.96 + progress * 0.04 + pulseStrength * 0.08 + dwell * 0.06).toFixed(2);
+      wave.lane.style.fill = layout.lane;
+      wave.lane.style.opacity = (1 + progress * 0.02 + dwell * 0.03).toFixed(2);
+      wave.progressText.textContent = progress < 0.98 ? (dwell > 0.35 ? "HOLDING" : "BUILDING") : "READY";
+      wave.progressText.style.opacity = (0.36 + progress * 0.58 + dwell * 0.1).toFixed(2);
+      wave.label.style.opacity = (0.78 + progress * 0.18 + dwell * 0.08).toFixed(2);
+      wave.label.style.fill = layout.bright;
+      wave.progressText.style.fill = layout.bright;
+      const markerProgress = progress * wave.markers.length;
+      wave.markers.forEach((marker, idx) => {
+        const m = clamp(markerProgress - idx, 0, 1);
+        marker.style.opacity = (0.18 + m * 0.82 + dwell * 0.08).toFixed(2);
+        marker.style.strokeWidth = (1.6 + m * 2.2 + dwell * 0.2).toFixed(2);
+      });
+      const thumbIndex = Math.min(points.length - 1, Math.max(0, Math.round(progress * (points.length - 1))));
+      const thumbPoint = points[thumbIndex];
+      wave.thumb.setAttribute("cx", thumbPoint.x.toFixed(2));
+      wave.thumb.setAttribute("cy", thumbPoint.y.toFixed(2));
+      wave.thumb.setAttribute("r", (6 + progress * 2.2 + pulseStrength * 0.4 + dwell * 0.5).toFixed(2));
+      wave.thumb.style.opacity = (0.96 + progress * 0.04 + pulseStrength * 0.08 + dwell * 0.04).toFixed(2);
+      wave.halo.setAttribute("cx", thumbPoint.x.toFixed(2));
+      wave.halo.setAttribute("cy", thumbPoint.y.toFixed(2));
+      const isPulsing = growthPulse.category === category && growthPulse.until > now;
+      const isResetting = now < resetUntil;
+      wave.row.classList.toggle("is-pulsing", isPulsing);
+      wave.row.classList.toggle("is-resetting", isResetting);
+      wave.row.style.transform = isPulsing
+        ? `translateY(${Math.sin((growthPulse.until - now) * 0.02) * 0.45}px)`
+        : isResetting
+          ? `translateX(${Math.max(-2, (resetUntil - now) * -0.003)}px)`
+          : `translateY(${(dwellBreath - 0.5) * 0.8}px)`;
+      wave.fill.style.strokeWidth = (4.8 + progress * 0.5 + pulseStrength * 0.15 + dwell * 0.22).toFixed(2);
+      wave.track.style.strokeWidth = (2.6 + progress * 0.18 + dwell * 0.18).toFixed(2);
+    });
+    soundWaves.style.opacity = (0.98 + energyMix * 0.04 + pulseStrength * 0.08 + dwell * 0.06).toFixed(2);
+  }
+  buildCategoryWaveforms();
 
   const MAX_BUILDINGS = 10;
-
-  const setStatus = (text, color = null) => {
-    statusText.textContent = text;
-    statusText.style.color = color || "var(--accent)";
-  };
 
   let sourceMenuOpen = false;
   const categoryLabels = {
@@ -2274,6 +2942,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       const isTap = !state.moved && dx <= TAP_THRESHOLD && dy <= TAP_THRESHOLD && scrollDelta <= TAP_THRESHOLD;
       reset();
       if (!isTap) return;
+      if (!isSourceUnlocked(key)) {
+        showTransientStatus("The city is still learning this sound.", null, 2200);
+        return;
+      }
       selectSourceCard(key, card);
     });
     card.addEventListener("pointercancel", reset);
@@ -2306,6 +2978,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
           <div class="source-menu-card-title">${meta.title}</div>
           <div class="source-menu-card-meta">${key === "random" ? meta.meta : meta.meta}</div>
         `;
+        syncSourceCardState(card, key);
         attachSourceCardInteraction(card, key);
         grid.appendChild(card);
       }
@@ -2328,6 +3001,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     sourceMenuOpen = false;
   }
   function selectSourceCard(key, card) {
+    if (!isSourceUnlocked(key)) {
+      showTransientStatus("The city is still learning this sound.", null, 2200);
+      return;
+    }
     sourceMenuStrip.querySelectorAll(".source-menu-card.active").forEach((el) => el.classList.remove("active"));
     card.classList.add("active");
     if (key === "upload") {
@@ -2350,32 +3027,17 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
       return;
     }
     if (!isAudioPlaying) {
-      const baseY = 50;
-      const gap = 10;
-      waveLines.forEach((line, i) => {
-        const y = baseY + i * gap;
-        line.setAttribute("d", `M0,${y} Q200,${y} 400,${y} T800,${y}`);
-      });
+      updateCategoryWaveforms();
       requestAnimationFrame(updateWaveform);
       return;
     }
-    const buildingCount = engine.instances.length;
-    const targetLines = Math.min(8, Math.max(1, Math.ceil(buildingCount / 2)));
-    updateWaveLines(targetLines);
     const level = Math.max(0, Math.min(1, engine.instances.reduce((sum, inst) => sum + inst.intensity, 0) / 6));
-    const shift = (level * 16 - 8).toFixed(2) + "%";
+    const dwell = isAudioPlaying && staySession.startedAt ? clamp((performance.now() - staySession.startedAt) / 150000, 0, 1) : 0;
+    const drift = Math.sin(performance.now() * 0.00009 + staySession.microPhase) * (0.7 + dwell * 1.2);
+    const shift = (level * 16 - 8 + drift).toFixed(2) + "%";
     document.documentElement.style.setProperty("--bg-shift", shift);
-    const t = performance.now() * 0.0012;
-    const baseY = 50;
-    const gap = 10;
-    waveLines.forEach((line, i) => {
-      const amp = (6 + level * 18) + (i % 3) * 4;
-      const phase = t * (1 + i * 0.08) + i;
-      const y = baseY + i * gap;
-      const p = Math.sin(phase) * amp;
-      line.setAttribute("d", `M0,${y} Q200,${y - p} 400,${y} T800,${y}`);
-      line.style.opacity = (0.25 + i * 0.03).toFixed(2);
-    });
+    updateCategoryWaveforms();
+    maybeEmitStayWhisper(performance.now());
     requestAnimationFrame(updateWaveform);
   }
 
@@ -2584,6 +3246,8 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     if (Tone.Transport.state !== "started") Tone.Transport.start();
     engine.masterVol.volume.rampTo(1, 0.2);
     engine.setPlaying(true);
+    ensureGrowthClock();
+    if (!isAudioPlaying) resetStaySession();
     document.body.classList.add("is-playing");
     earContainer.classList.add("is-playing");
     isAudioPlaying = true;
@@ -2599,6 +3263,10 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     addRandomBuilding(category);
   }
   async function requestBuildingByKey(key) {
+    if (!isSourceUnlocked(key)) {
+      showTransientStatus("The city is still learning this sound.", null, 2200);
+      return;
+    }
     if (isMobileBuildingLimitReached()) {
       setStatus(`MOBILE LIMIT REACHED (MAX ${MOBILE_BUILDING_LIMIT})`, "#ff6b6b");
       setTimeout(() => setStatus("TAP THE EAR TO ADD A BRICK"), 2000);
@@ -2637,6 +3305,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
   function addBuildingByKey(key) {
     const reg = SOURCE_REGISTRY[key];
     if (!reg) return;
+    if (!isSourceUnlocked(key)) return;
     if (isMobileBuildingLimitReached()) return;
     
     const building = document.createElement("div");
@@ -2656,7 +3325,7 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     const initialIntensity = reg.vol[0] + Math.random() * (reg.vol[1] - reg.vol[0]);
     building.style.height = `${Math.max(15, initialIntensity * 100)}%`;
     
-    const inst = engine.ensure(key, reg.cls, { type: key, intensity: initialIntensity, el: building });
+    const inst = engine.ensure(key, reg.cls, { type: key, category: reg.category, intensity: initialIntensity, el: building });
     if (isAudioPlaying && typeof inst.setPlaying === "function") {
       void inst.setPlaying(true);
     }
@@ -2718,12 +3387,13 @@ Project produced by Wu Siou Ming. @ <a href="https://instagram.com/wusiouming" t
     bottomHint.style.display = "none";
     engine.updateAllPans();
     setupBuildingDrag(building, inst, removeBuilding);
-
     setStatus("DRAG TO SHAPE THE CITY");
   }
   function addRandomBuilding(category = null) {
-    const keys = category ? CATEGORY_KEYS[category] : Object.keys(SOURCE_REGISTRY);
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    const keys = (category ? getCategoryKeys(category) : Object.keys(SOURCE_REGISTRY)).filter((key) => isSourceUnlocked(key));
+    const pool = keys.length ? keys : Object.keys(SOURCE_REGISTRY).filter((key) => isSourceUnlocked(key));
+    if (!pool.length) return;
+    const randomKey = pool[Math.floor(Math.random() * pool.length)];
     addBuildingByKey(randomKey);
   }
 
